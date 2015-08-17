@@ -8,6 +8,7 @@ public class OthelloPlayer {
     public final Othello.Color color;
     public final GetMoveStrategy getMove;
 
+    // TODO: wrap GetMoveStrategy directly in the Player object
     public OthelloPlayer(Othello othello, Othello.Color color, GetMoveStrategy getMove) {
         this.othello = othello;
         this.color = color;
