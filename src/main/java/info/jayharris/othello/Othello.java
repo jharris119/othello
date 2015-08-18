@@ -1,10 +1,19 @@
 package info.jayharris.othello;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import info.jayharris.othello.strategy.GetMoveKeyboard;
 import info.jayharris.othello.strategy.GetMoveStrategy;
 
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.regex.*;
+import java.util.stream.Stream;
 
 public class Othello {
 
@@ -58,7 +67,24 @@ public class Othello {
 
             for (int rank = 0; rank < SQUARES_PER_SIDE; ++rank) {
                 for (int file = 0; file < SQUARES_PER_SIDE; ++file) {
-                    grid[rank][file] = new Square(rank, file);
+                    Square me = grid[rank][file] = new Square(rank, file);
+
+                    if (file > 0) {
+                        me._w = grid[rank][file - 1];
+                        me._w._e = me;
+                    }
+                    if (rank > 0) {
+                        if (file > 0) {
+                            me._nw = grid[rank - 1][file - 1];
+                            me._nw._se = me;
+                        }
+                        me._n = grid[rank - 1][file];
+                        me._n._s = me;
+                        if (file + 1 < SQUARES_PER_SIDE) {
+                            me._ne = grid[rank - 1][file + 1];
+                            me._ne._sw = me;
+                        }
+                    }
                 }
             }
         }
@@ -92,10 +118,73 @@ public class Othello {
             private final int rank, file;
             private Color color;
 
+            private Square _n, _ne, _e, _se, _s, _sw, _w, _nw;
+            private Set<Square> neighbors = null;
+
             Square(final int rank, final int file) {
                 this.rank = rank;
                 this.file = file;
                 this.color = null;
+            }
+
+            /**
+             * Get the {@link Square}s in this {@code Square}'s Moore neighborhood.
+             *
+             * @return a set of {@code Square}s adjacent to this
+             */
+            public Set<Square> getMooreNeighborhood() {
+                if (neighbors == null) {
+                    neighbors = Sets.newHashSet(_n, _ne, _e, _se, _s, _sw, _w, _nw);
+                    neighbors.removeIf(Objects::nonNull);
+                }
+                return neighbors;
+            }
+
+            /* ****************************************************************
+             * Reader methods
+             * ****************************************************************/
+            public int getRank() {
+                return rank;
+            }
+
+            public int getFile() {
+                return file;
+            }
+
+            public Color getColor() {
+                return color;
+            }
+
+            public Square get_n() {
+                return _n;
+            }
+
+            public Square get_ne() {
+                return _ne;
+            }
+
+            public Square get_e() {
+                return _e;
+            }
+
+            public Square get_se() {
+                return _se;
+            }
+
+            public Square get_s() {
+                return _s;
+            }
+
+            public Square get_sw() {
+                return _sw;
+            }
+
+            public Square get_w() {
+                return _w;
+            }
+
+            public Square get_nw() {
+                return _nw;
             }
         }
 
