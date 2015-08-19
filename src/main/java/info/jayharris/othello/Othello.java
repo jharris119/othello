@@ -135,7 +135,7 @@ public class Othello {
             public Set<Square> getMooreNeighborhood() {
                 if (neighbors == null) {
                     neighbors = Sets.newHashSet(_n, _ne, _e, _se, _s, _sw, _w, _nw);
-                    neighbors.removeIf(Objects::nonNull);
+                    neighbors.removeIf(Objects::isNull);
                 }
                 return neighbors;
             }
