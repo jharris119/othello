@@ -1,19 +1,14 @@
 package info.jayharris.othello;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicates;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import info.jayharris.othello.strategy.GetMoveKeyboard;
 import info.jayharris.othello.strategy.GetMoveStrategy;
 
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Predicate;
-import java.util.regex.*;
-import java.util.stream.Stream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Othello {
 
@@ -43,7 +38,7 @@ public class Othello {
     }
 
     /**
-     * Get the square referred to via algebriac notation.
+     * Gets the square referred to via algebriac notation.
      *
      * Note that "a1" is the <i>upper</i>-left square, unlike in chess
      * algebriac notation.
@@ -89,20 +84,52 @@ public class Othello {
             }
         }
 
+        /**
+         * If this a legal move, places a disc of the given color on the given
+         * square and flips the appropriate discs.
+         *
+         * @param square the {@link Square}
+         * @param color the {@link Color}
+         * @return {@code true} iff this is a valid move for the given player
+         */
+//        protected boolean setPiece(Square square, Color color) {
+//            boolean legal = false;
+//
+//            if (square.getColor() != null) {
+//                return false;
+//            }
+//
+//            for (deltarank = -1; deltarank <= 1; ++deltarank) {
+//                for (deltafile = -1; deltafile <= 1; ++deltafile) {
+//                    if (deltarank == 0 && deltafile == 0) {
+//                        continue;
+//                    }
+//
+//                    if (flipLine(square, color, deltarank, deltafile)) {
+//                        legal = true;
+//                    }
+//                }
+//            }
+//
+//            return legal;
+//        }
+
+        public boolean flipLine(Square square, Color color, )
+
         protected Square getSquare(String square) {
-            Pattern pattern = Pattern.compile("^([a-z]+)([1-9]\\d*)$", Pattern.CASE_INSENSITIVE);
-            Matcher matcher = pattern.matcher(square);
+            Pattern pattern = Pattern.compile("^([a-z])([1-9]\\d*)$");
+            Matcher matcher = pattern.matcher(square.toLowerCase());
             Preconditions.checkArgument(matcher.matches());
 
-            int rank = Integer.valueOf(matcher.group(1), 26) - 10,
+            int rank = matcher.group(1).charAt(0) - 'a',
                     file = Integer.valueOf(matcher.group(2)) - 1;
 
             return getSquare(rank, file);
         }
 
         /**
-         * Get the square at {@code (rank, file)}.
-         *match
+         * Gets the square at {@code (rank, file)}.
+         *
          * @param rank the rank {@code 0 <= rank < SQUARES_PER_SIDE}
          * @param file the file {@code 0 <= file < SQUARES_PER_SIDE}
          * @return the square
@@ -128,7 +155,7 @@ public class Othello {
             }
 
             /**
-             * Get the {@link Square}s in this {@code Square}'s Moore neighborhood.
+             * Gets the {@link Square}s in this {@code Square}'s Moore neighborhood.
              *
              * @return a set of {@code Square}s adjacent to this
              */
