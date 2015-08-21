@@ -24,6 +24,11 @@ public class Othello {
         }
     }
 
+    public final static ImmutableList<Function<Board.Square, Board.Square>> directions = ImmutableList.of(
+            Board.Square::get_n, Board.Square::get_ne, Board.Square::get_e, Board.Square::get_se,
+            Board.Square::get_s, Board.Square::get_sw, Board.Square::get_w, Board.Square::get_nw
+    );
+
     public Othello(GetMoveStrategy blackGetMove, GetMoveStrategy whiteGetMove) {
         board = new Board();
 
