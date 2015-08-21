@@ -1,12 +1,16 @@
 package info.jayharris.othello;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import info.jayharris.othello.strategy.GetMoveKeyboard;
 import info.jayharris.othello.strategy.GetMoveStrategy;
 
+import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -90,44 +94,59 @@ public class Othello {
         }
 
         /**
-         * If this a legal move, places a disc of the given color on the given
-         * square and flips the appropriate discs.
+         * Puts a disc of the given color on this square, if legal, and flip
+         * the necessary discs.
          *
-         * @param square the {@link Square}
-         * @param color the {@link Color}
-         * @return {@code true} iff this is a valid move for the given player
+         * @param square the square
+         * @param color the color
+         * @return {@code true} iff this move is legal
          */
-//        protected boolean setPiece(Square square, Color color) {
-//            boolean legal = false;
-//
-//            if (square.getColor() != null) {
-//                return false;
-//            }
-//
-//            for (deltarank = -1; deltarank <= 1; ++deltarank) {
-//                for (deltafile = -1; deltafile <= 1; ++deltafile) {
-//                    if (deltarank == 0 && deltafile == 0) {
-//                        continue;
-//                    }
-//
-//                    if (flipLine(square, color, deltarank, deltafile)) {
-//                        legal = true;
-//                    }
-//                }
-//            }
-//
-//            return legal;
-//        }
+        public boolean setPiece(Square square, Color color) {
+            Preconditions.checkArgument(square.getColor() == null);
+            directions.forEach((direction) -> {
+                if (flipDiscsInDirection(square, color, direction)) {
+                    square.setPiece(color);
+                }
+            });
+            return square.getColor() != null;
+        }
 
-        public boolean flipLine(Square square, Color color, )
+        /**
+         * Flips all the opposite-colored discs in a given direction.
+         *
+         * More precisely, given {@code start} and {@code color}, finds the
+         * first {@code color}-ed disc <var>D</var> in a {@code direction}-ward
+         * line from {@code start}. If <var>D</var> exists, flip all the discs
+         * between {@code start} and <var>D</var>, exclusive.
+         *
+         * @param start the start square
+         * @param color the color
+         * @param direction the direction
+         * @return {@code true} iff discs were flipped
+         */
+        protected boolean flipDiscsInDirection(Square start, Color color, Function<Square, Square> direction) {
+            Square current = direction.apply(start);
+
+            LinkedList<Square> toFlip = Lists.newLinkedList();
+            while (current != null && current.getColor() == color.opposite()) {
+                toFlip.add(current);
+                current = direction.apply(current);
+            }
+
+            if (current == null || current.getColor() != color || toFlip.isEmpty()) {
+                return false;
+            }
+            toFlip.forEach(Square::flip);
+            return true;
+        }
 
         protected Square getSquare(String square) {
             Pattern pattern = Pattern.compile("^([a-z])([1-9]\\d*)$");
             Matcher matcher = pattern.matcher(square.toLowerCase());
             Preconditions.checkArgument(matcher.matches());
 
-            int rank = matcher.group(1).charAt(0) - 'a',
-                    file = Integer.valueOf(matcher.group(2)) - 1;
+            int file = matcher.group(1).charAt(0) - 'a',
+                    rank = Integer.valueOf(matcher.group(2)) - 1;
 
             return getSquare(rank, file);
         }
@@ -157,6 +176,35 @@ public class Othello {
                 this.rank = rank;
                 this.file = file;
                 this.color = null;
+            }
+
+            /**
+             * Flips the disc in this square, if there is a disc in this square.
+             *
+             * @return the new disc color, or {@code null} if this square is empty
+             */
+            private Color tryFlip() {
+                try {
+                    return flip();
+                }
+                catch(IllegalStateException e) {
+                    return null;
+                }
+            }
+
+            private Color flip() throws IllegalStateException {
+                Preconditions.checkNotNull(this.color);
+                return this.color = color.opposite();
+            }
+
+            /**
+             * Puts a disc with the given color on this square, without regard
+             * to whether such a play is legal.
+             *
+             * @param color the color
+             */
+            private void setPiece(Color color) {
+                this.color = color;
             }
 
             /**
@@ -218,8 +266,8 @@ public class Othello {
             public Square get_nw() {
                 return _nw;
             }
-        }
 
+        }
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
@@ -239,8 +287,8 @@ public class Othello {
             }
             return sb.toString();
         }
-    }
 
+    }
     public static void main(String... args) {
         GetMoveStrategy gmsBlack = new GetMoveKeyboard();
         GetMoveStrategy gmsWhite = new GetMoveKeyboard();

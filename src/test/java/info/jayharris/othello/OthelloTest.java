@@ -1,9 +1,7 @@
 package info.jayharris.othello;
 
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.Before;
@@ -11,17 +9,24 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.util.EnumMap;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.*;
-import static org.junit.Assume.*;
+import static org.junit.Assume.assumeThat;
 
 public class OthelloTest {
 
     Othello othello;
+
+    Method squareSetPieceMethod;
+
+    public OthelloTest() throws Exception {
+        squareSetPieceMethod = Othello.Board.Square.class.getDeclaredMethod("setPiece", Othello.Color.class);
+        squareSetPieceMethod.setAccessible(true);
+    }
 
     @Before
     public void setUp() {
@@ -34,7 +39,7 @@ public class OthelloTest {
     @Test
     public void testGetSquare() {
         assertSame(othello.board.grid[0][0], othello.board.getSquare("a1"));
-        assertSame(othello.board.grid[4][6], othello.board.getSquare("E7"));
+        assertSame(othello.board.grid[6][4], othello.board.getSquare("E7"));
         assertSame(othello.board.grid[7][7], othello.board.getSquare("h8"));
 
         thrown.expect(IllegalArgumentException.class);
@@ -45,23 +50,23 @@ public class OthelloTest {
     }
 
     @Test
-    public void testGetMooreNeighborhood() {
+    public void testGetMooreNeighborhood() throws Exception {
         Othello.Board.Square square;
         Set<Othello.Board.Square> expected, actual;
 
-        square   = othello.getSquare("f5");
-        actual   = square.getMooreNeighborhood();
+        square = othello.getSquare("f5");
+        actual = square.getMooreNeighborhood();
         expected = ImmutableSet.of(square.get_e(), square.get_n(), square.get_ne(), square.get_nw(),
                 square.get_s(), square.get_se(), square.get_sw(), square.get_w());
         assertEquals(expected, actual);
 
-        square   = othello.getSquare("b1");
-        actual   = square.getMooreNeighborhood();
+        square = othello.getSquare("b1");
+        actual = square.getMooreNeighborhood();
         expected = ImmutableSet.of(square.get_e(), square.get_s(), square.get_se(), square.get_sw(), square.get_w());
         assertEquals(expected, actual);
 
-        square   = othello.getSquare("a8");
-        actual   = square.getMooreNeighborhood();
+        square = othello.getSquare("a8");
+        actual = square.getMooreNeighborhood();
         expected = ImmutableSet.of(square.get_e(), square.get_n(), square.get_ne());
         assertEquals(expected, actual);
     }
@@ -70,24 +75,21 @@ public class OthelloTest {
     public void testSetPiece() {
         Othello.Board board = othello.board;
 
-        assumeThat(board, new OthelloBoardMatcher(board,
-                new HashMap<Othello.Color, Set<String>>() {{
+        assumeThat(board, new OthelloBoardMatcher(new HashMap<Othello.Color, Set<String>>() {{
                     this.put(Othello.Color.BLACK, ImmutableSet.of("d5", "e4"));
                     this.put(Othello.Color.WHITE, ImmutableSet.of("d4", "e5"));
                 }}
         ));
 
         assertTrue(board.setPiece(board.getSquare("c4"), Othello.Color.BLACK));
-        assertThat(board, new OthelloBoardMatcher(board,
-                new HashMap<Othello.Color, Set<String>>() {{
+        assertThat(board, new OthelloBoardMatcher(new HashMap<Othello.Color, Set<String>>() {{
                     this.put(Othello.Color.BLACK, ImmutableSet.of("c4", "d4", "e4", "d5"));
                     this.put(Othello.Color.WHITE, ImmutableSet.of("e5"));
                 }}
         ));
 
-        assertTrue(board.setPiece(board.getSquare("e3"), Othello.Color.WHTIE));
-        assertThat(board, new OthelloBoardMatcher(board,
-                new HashMap<Othello.Color, Set<String>>() {{
+        assertTrue(board.setPiece(board.getSquare("e3"), Othello.Color.WHITE));
+        assertThat(board, new OthelloBoardMatcher(new HashMap<Othello.Color, Set<String>>() {{
                     this.put(Othello.Color.BLACK, ImmutableSet.of("c4", "d4", "d5"));
                     this.put(Othello.Color.WHITE, ImmutableSet.of("e3", "e4", "e5"));
                 }}
@@ -95,8 +97,7 @@ public class OthelloTest {
 
         // doesn't flip anything, assert false
         assertFalse(board.setPiece(board.getSquare("e6"), Othello.Color.BLACK));
-        assertThat(board, new OthelloBoardMatcher(board,
-                new HashMap<Othello.Color, Set<String>>() {{
+        assertThat(board, new OthelloBoardMatcher(new HashMap<Othello.Color, Set<String>>() {{
                     this.put(Othello.Color.BLACK, ImmutableSet.of("c4", "d4", "d5"));
                     this.put(Othello.Color.WHITE, ImmutableSet.of("e3", "e4", "e5"));
                 }}
@@ -107,7 +108,7 @@ public class OthelloTest {
 
         Map<Othello.Board.Square, Othello.Color> pieces;
 
-        public OthelloBoardMatcher(Othello.Board board, Map<Othello.Color, Set<String>> pieceslist) {
+        public OthelloBoardMatcher(Map<Othello.Color, Set<String>> pieceslist) {
             pieces = Maps.newHashMap();
             for (String str : pieceslist.get(Othello.Color.BLACK)) {
                 pieces.put(othello.getSquare(str), Othello.Color.BLACK);
