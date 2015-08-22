@@ -4,12 +4,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import info.jayharris.othello.strategy.GetMoveKeyboard;
-import info.jayharris.othello.strategy.GetMoveStrategy;
 
-import java.util.LinkedList;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,6 +15,10 @@ public class Othello {
     final Board board;
     final OthelloPlayer black, white;
     private OthelloPlayer current;
+
+    private final Set<Board.Square> occupied,
+                                    fringeAdjacent;     // the fringe is the set of discs bounded by at least one
+                                                        // empty square — this is a set of those empty squares
 
     public enum Color {
         BLACK, WHITE;
@@ -33,21 +33,52 @@ public class Othello {
             Board.Square::get_s, Board.Square::get_sw, Board.Square::get_w, Board.Square::get_nw
     );
 
-    public Othello(GetMoveStrategy blackGetMove, GetMoveStrategy whiteGetMove) {
+    public Othello() {
         board = new Board();
 
         int p = board.SQUARES_PER_SIDE / 2 - 1;
-        board.grid[p][p].color = Color.WHITE;
-        board.grid[p + 1][p].color = Color.BLACK;
-        board.grid[p][p + 1].color = Color.BLACK;
-        board.grid[p + 1][p + 1].color = Color.WHITE;
+        board.grid[p][p].setPiece(Color.WHITE);
+        board.grid[p + 1][p].setPiece(Color.BLACK);
+        board.grid[p][p + 1].setPiece(Color.BLACK);
+        board.grid[p + 1][p + 1].setPiece(Color.WHITE);
 
-        black = new OthelloPlayer(this, Color.BLACK, blackGetMove);
-        white = new OthelloPlayer(this, Color.WHITE, whiteGetMove);
+        occupied = new HashSet<Board.Square>() {{
+            this.add(board.grid[p][p]);
+            this.add(board.grid[p + 1][p]);
+            this.add(board.grid[p][p + 1]);
+            this.add(board.grid[p + 1][p + 1]);
+        }};
+
+        black = new OthelloPlayerWithKeyboard(this, Color.BLACK);
+        white = new OthelloPlayerWithKeyboard(this, Color.WHITE);
+        current = black;
+
+        fringeAdjacent = new HashSet<Board.Square>() {{
+            occupied.forEach((square) -> this.addAll(square.getMooreNeighborhood()));
+        }};
+        fringeAdjacent.removeIf(Board.Square::isOccupied);
+    }
+
+    protected Set<Board.Square> getMovesFor(Color color) {
+        Set<Board.Square> moves = Sets.newHashSet();
+        fringeAdjacent.forEach((square) -> {
+            if (board.isLegalMoveForColor(square, color)) {
+                moves.add(square);
+            }
+        });
+        return moves;
+    }
+
+    protected boolean hasMovesFor(Color color) {
+        return !getMovesFor(color).isEmpty();
+    }
+
+    public boolean isGameOver() {
+        return !(hasMovesFor(Color.BLACK) || hasMovesFor(Color.WHITE));
     }
 
     /**
-     * Gets the square referred to via algebriac notation.
+     * Gets the square referred to via algebraic notation.
      *
      * Note that "a1" is the <i>upper</i>-left square, unlike in chess
      * algebriac notation.
@@ -112,6 +143,29 @@ public class Othello {
         }
 
         /**
+         * Determines if {@code square} is a legal move for {@code color}.
+         *
+         * @param square the square
+         * @param color the color
+         * @return {@code true} iff there is at least one opposite-colored
+         * disc in a straight line between this square and a same-colored disc
+         */
+        protected boolean isLegalMoveForColor(Square square, Color color) {
+            for (Function<Square, Square> direction : directions) {
+                Square current = direction.apply(square);
+                if (current != null && current.getColor() == color.opposite()) {
+                    do {
+                        current = direction.apply(current);
+                    } while (current != null && current.getColor() == color.opposite());
+                    if (current != null && current.getColor() == color) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /**
          * Flips all the opposite-colored discs in a given direction.
          *
          * More precisely, given {@code start} and {@code color}, finds the
@@ -166,6 +220,7 @@ public class Othello {
         }
 
         public class Square {
+
             private final int rank, file;
             private Color color;
 
@@ -176,20 +231,6 @@ public class Othello {
                 this.rank = rank;
                 this.file = file;
                 this.color = null;
-            }
-
-            /**
-             * Flips the disc in this square, if there is a disc in this square.
-             *
-             * @return the new disc color, or {@code null} if this square is empty
-             */
-            private Color tryFlip() {
-                try {
-                    return flip();
-                }
-                catch(IllegalStateException e) {
-                    return null;
-                }
             }
 
             private Color flip() throws IllegalStateException {
@@ -218,6 +259,15 @@ public class Othello {
                     neighbors.removeIf(Objects::isNull);
                 }
                 return neighbors;
+            }
+
+            /**
+             * Gets whether this square has already been played.
+             *
+             * @return {@code true} iff this square has a disc on it
+             */
+            public boolean isOccupied() {
+                return this.getColor() != null;
             }
 
             /* ****************************************************************
@@ -267,6 +317,15 @@ public class Othello {
                 return _nw;
             }
 
+            @Override
+            public String toString() {
+                return "Square{" +
+                        "rank=" + rank +
+                        ", file=" + file +
+                        ", color=" + color +
+                        '}';
+            }
+
         }
         @Override
         public String toString() {
@@ -290,10 +349,7 @@ public class Othello {
 
     }
     public static void main(String... args) {
-        GetMoveStrategy gmsBlack = new GetMoveKeyboard();
-        GetMoveStrategy gmsWhite = new GetMoveKeyboard();
-
-        Othello o = new Othello(gmsBlack::getNextMove, gmsWhite::getNextMove);
+        Othello o = new Othello();
         System.out.println(o.board);
     }
 }
