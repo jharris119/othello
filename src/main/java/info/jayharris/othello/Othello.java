@@ -137,8 +137,15 @@ public class Othello {
             directions.forEach((direction) -> {
                 if (flipDiscsInDirection(square, color, direction)) {
                     square.setPiece(color);
+
+                    Set<Square> m = square.getMooreNeighborhood();
+                    m.removeIf(Square::isOccupied);
+                    fringeAdjacent.remove(square);
+                    fringeAdjacent.addAll(m);
                 }
             });
+
+
             return square.getColor() != null;
         }
 
