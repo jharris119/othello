@@ -23,12 +23,15 @@ public class OthelloTest {
 
     Othello othello;
 
-    static Field boardField;
+    static Field boardField, fringeAdjacentField;
     static Method squareSetPieceMethod;
 
     public OthelloTest() throws Exception {
         boardField = Othello.class.getDeclaredField("board");
         boardField.setAccessible(true);
+
+        fringeAdjacentField = Othello.class.getDeclaredField("fringeAdjacent");
+        fringeAdjacentField.setAccessible(true);
 
         squareSetPieceMethod = Othello.Board.Square.class.getDeclaredMethod("setPiece", Color.class);
         squareSetPieceMethod.setAccessible(true);
@@ -68,7 +71,6 @@ public class OthelloTest {
             "   w    " +
             "    w   " +
             "     b  ";
-        Othello.Board b = OthelloBoardBuilder.build(othello, s);
         boardField.set(othello, OthelloBoardBuilder.build(othello, s));
 
         square = othello.getSquare("f3");
@@ -141,7 +143,21 @@ public class OthelloTest {
     public void testGetMovesFor() throws Exception {
         Set<Othello.Board.Square> expected;
 
-        expected = Sets.newHashSet("d3", "c4", "f6", "e5").stream().map(othello::getSquare).collect(Collectors.toSet());
+        expected = Sets.newHashSet("d3", "c4", "f5", "e6")
+                .stream()
+                .map((str) -> othello.board.getSquare(str))
+                .collect(Collectors.toSet());
+        assertEquals(expected, othello.getMovesFor(Color.BLACK));
+
+        othello.board.setPiece(othello.getSquare("d3"), Color.BLACK);
+        othello.board.setPiece(othello.getSquare("c3"), Color.WHITE);
+        othello.board.setPiece(othello.getSquare("c4"), Color.BLACK);
+        othello.board.setPiece(othello.getSquare("e3"), Color.WHITE);
+
+        expected = Sets.newHashSet("b2", "c2", "d2", "e2", "f2", "f3", "f4", "f5", "f6")
+                .stream()
+                .map((str) -> othello.board.getSquare(str))
+                .collect(Collectors.toSet());
         assertEquals(expected, othello.getMovesFor(Color.BLACK));
     }
 
@@ -158,6 +174,11 @@ public class OthelloTest {
             "  wbbbbb" +
             "  wwbbbb";
         boardField.set(othello, OthelloBoardBuilder.build(othello, s));
+        fringeAdjacentField.set(othello,
+                Sets.newHashSet("a1", "b1", "c1", "d1", "e1", "f1", "g1", "b2", "d2", "e2", "g7", "a7", "b7", "b8")
+                    .stream()
+                    .map((str) -> othello.board.getSquare(str))
+                    .collect(Collectors.toSet()));
         assertFalse(othello.isGameOver());
 
         s = "w bbbbbb" +
@@ -169,6 +190,7 @@ public class OthelloTest {
             "wwbbwbwb" +
             "wwwwwwww";
         boardField.set(othello, OthelloBoardBuilder.build(othello, s));
+        fringeAdjacentField.set(othello, Collections.singleton(othello.getSquare("b1")));
         assertTrue(othello.isGameOver());
 
         s = "bbbbbbbb" +
@@ -180,6 +202,7 @@ public class OthelloTest {
             "wwwwwbbb" +
             "wbbbbbbb";
         boardField.set(othello, OthelloBoardBuilder.build(othello, s));
+        fringeAdjacentField.set(othello, Collections.emptySet());
         assertTrue(othello.isGameOver());
     }
 
