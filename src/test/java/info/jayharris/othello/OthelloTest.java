@@ -12,9 +12,7 @@ import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static info.jayharris.othello.Othello.*;

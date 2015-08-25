@@ -59,6 +59,46 @@ public class Othello {
         fringeAdjacent.removeIf(Board.Square::isOccupied);
     }
 
+    /**
+     * Plays the game.
+     *
+     * @return the winner, or {@code null} if a tie
+     */
+    public OthelloPlayer play() {
+        while (!isGameOver()) {
+            // at least one player has legal moves, if it's not the current player then skip their turn
+            if (!hasMovesFor(current.color)) {
+                current = (current == white ? black : white);
+
+            }
+            nextPly();
+        }
+
+        int whitecount = 0, blackcount = 0;
+        for (int rank = 0; rank < board.SQUARES_PER_SIDE; ++rank) {
+            for (int file = 0; file < board.SQUARES_PER_SIDE; ++rank) {
+                Color color = board.getSquare(rank, file).getColor();
+                if (color == Color.WHITE) {
+                    ++whitecount;
+                }
+                else if (color == Color.BLACK) {
+                    ++blackcount;
+                }
+            }
+        }
+        return whitecount < blackcount ? white : (blackcount > whitecount ? black : null);
+    }
+
+    protected void nextPly() {
+        Preconditions.checkState(hasMovesFor(current.color));
+
+        Board.Square move;
+        do {
+            move = current.getMove();
+        } while (!board.setPiece(move, current.color));
+        current = (current == white ? black : white);
+    }
+
     protected Set<Board.Square> getMovesFor(Color color) {
         Set<Board.Square> moves = Sets.newHashSet();
         fringeAdjacent.forEach((square) -> {
@@ -85,7 +125,7 @@ public class Othello {
      *
      * @param square the square name, in algebriac notation
      * @return the square
-     * @throws java.lang.IllegalArgumentException if the algebriac notation
+     * @throws java.lang.IllegalArgumentException if the algebraic notation
      * is invalid or refers to a non-existent square
      */
     public Board.Square getSquare(String square) {
@@ -144,7 +184,6 @@ public class Othello {
                     fringeAdjacent.addAll(m);
                 }
             });
-
 
             return square.getColor() != null;
         }
@@ -357,6 +396,7 @@ public class Othello {
     }
     public static void main(String... args) {
         Othello o = new Othello();
+        o.play();
         System.out.println(o.board);
     }
 }
