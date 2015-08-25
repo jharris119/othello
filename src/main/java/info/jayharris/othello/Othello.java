@@ -49,6 +49,7 @@ public class Othello {
             this.add(board.grid[p + 1][p + 1]);
         }};
 
+        // TODO: replace this guy with injected players
         black = new OthelloPlayerWithKeyboard(this, Color.BLACK);
         white = new OthelloPlayerWithKeyboard(this, Color.WHITE);
         current = black;
