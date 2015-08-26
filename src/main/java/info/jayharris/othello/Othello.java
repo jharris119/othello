@@ -78,7 +78,7 @@ public class Othello {
 
         int whitecount = 0, blackcount = 0;
         for (int rank = 0; rank < board.SQUARES_PER_SIDE; ++rank) {
-            for (int file = 0; file < board.SQUARES_PER_SIDE; ++rank) {
+            for (int file = 0; file < board.SQUARES_PER_SIDE; ++file) {
                 Color color = board.getSquare(rank, file).getColor();
                 if (color == Color.WHITE) {
                     ++whitecount;
