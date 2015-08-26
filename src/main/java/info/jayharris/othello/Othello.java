@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -33,7 +35,7 @@ public class Othello {
             Board.Square::get_s, Board.Square::get_sw, Board.Square::get_w, Board.Square::get_nw
     );
 
-    public Othello() {
+    public Othello(Class<? extends OthelloPlayer> blacktype, Class<? extends OthelloPlayer> whitetype) {
         board = new Board();
 
         int p = board.SQUARES_PER_SIDE / 2 - 1;
@@ -49,10 +51,9 @@ public class Othello {
             this.add(board.grid[p + 1][p + 1]);
         }};
 
-        // TODO: replace this guy with injected players
-        black = new OthelloPlayerWithKeyboard(this, Color.BLACK);
-        white = new OthelloPlayerWithKeyboard(this, Color.WHITE);
-        current = black;
+        black = this.buildPlayer(blacktype, Color.BLACK);
+        white = this.buildPlayer(whitetype, Color.WHITE);
+        current = this.black;
 
         fringeAdjacent = new HashSet<Board.Square>() {{
             occupied.forEach((square) -> this.addAll(square.getMooreNeighborhood()));
@@ -116,6 +117,16 @@ public class Othello {
 
     public boolean isGameOver() {
         return !(hasMovesFor(Color.BLACK) || hasMovesFor(Color.WHITE));
+    }
+
+    private OthelloPlayer buildPlayer(Class<? extends OthelloPlayer> type, Color color) {
+        try {
+            Constructor ctor = type.getConstructor(Othello.class, Othello.Color.class);
+            return (OthelloPlayer) ctor.newInstance(this, color);
+        }
+        catch(NoSuchMethodException|InvocationTargetException|InstantiationException|IllegalAccessException e) {
+            return new OthelloPlayerWithKeyboard(this, color);
+        }
     }
 
     /**
@@ -393,10 +404,10 @@ public class Othello {
             }
             return sb.toString();
         }
-
     }
+
     public static void main(String... args) {
-        Othello o = new Othello();
+        Othello o = new Othello(OthelloPlayerWithKeyboard.class, OthelloPlayerWithKeyboard.class);
         o.play();
         System.out.println(o.board);
     }

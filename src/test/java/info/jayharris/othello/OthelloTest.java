@@ -39,7 +39,7 @@ public class OthelloTest {
 
     @Before
     public void setUp() {
-        othello = new Othello();
+        othello = new Othello(OthelloPlayerWithKeyboard.class, OthelloPlayerWithKeyboard.class);
     }
 
     @Rule
