@@ -14,16 +14,18 @@ public class OthelloPlayerWithKeyboard extends OthelloPlayer {
     public Othello.Board.Square getMove() {
         System.out.println(othello.board);
 
-        System.out.print(String.format("%s's turn. Place disc at: ",
+        System.out.println(String.format("%s's turn. Place disc at: ",
                 color == Othello.Color.WHITE ? "White" : "Black"));
 
         Othello.Board.Square square = null;
         while (square == null) {
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
+            try {
+                BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
                 square = othello.getSquare(br.readLine());
             }
             catch (IOException |IllegalArgumentException e) {
-                square = null;
+                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         }
         return square;
