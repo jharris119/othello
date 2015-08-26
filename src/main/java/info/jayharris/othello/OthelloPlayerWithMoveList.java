@@ -27,8 +27,4 @@ public class OthelloPlayerWithMoveList extends OthelloPlayer {
         }
         return null;
     }
-
-    public static OthelloPlayerWithMoveList create(Othello othello, Othello.Color color, List<Othello.Board.Square> moves) {
-        return new OthelloPlayerWithMoveList(othello, color, moves);
-    }
 }

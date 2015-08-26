@@ -30,8 +30,4 @@ public class OthelloPlayerWithKeyboard extends OthelloPlayer {
         }
         return square;
     }
-
-    public static OthelloPlayerWithKeyboard create(Othello othello, Othello.Color color) {
-        return new OthelloPlayerWithKeyboard(othello, color);
-    }
 }
