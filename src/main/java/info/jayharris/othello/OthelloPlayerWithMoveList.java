@@ -5,9 +5,12 @@ import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * An OthelloPlayer who just plays the next move off a given list.
+ * He's useful for testing purposes.
+ */
 public class OthelloPlayerWithMoveList extends OthelloPlayer {
 
-    List<Othello.Board.Square> moves;
     Iterator<Othello.Board.Square> iterator;
 
     public OthelloPlayerWithMoveList(Othello othello, Othello.Color color) {
@@ -16,8 +19,11 @@ public class OthelloPlayerWithMoveList extends OthelloPlayer {
 
     public OthelloPlayerWithMoveList(Othello othello, Othello.Color color, List<Othello.Board.Square> moves) {
         super(othello, color);
-        this.moves = moves;
         this.iterator = moves.iterator();
+    }
+
+    public void setIterator(Iterator<Othello.Board.Square> iterator) {
+        this.iterator = iterator;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package info.jayharris.othello;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -23,7 +24,7 @@ public class OthelloTest {
 
     Othello othello;
 
-    static Field boardField, fringeAdjacentField;
+    static Field boardField, fringeAdjacentField, currentField;
     static Method squareSetPieceMethod;
 
     public OthelloTest() throws Exception {
@@ -35,18 +36,166 @@ public class OthelloTest {
 
         squareSetPieceMethod = Othello.Board.Square.class.getDeclaredMethod("setPiece", Color.class);
         squareSetPieceMethod.setAccessible(true);
-    }
 
-    @Before
-    public void setUp() {
-        othello = new Othello(OthelloPlayerWithKeyboard.class, OthelloPlayerWithKeyboard.class);
+        currentField = Othello.class.getDeclaredField("current");
+        currentField.setAccessible(true);
     }
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
     @Test
+    public void testNextPly() throws Exception {
+        othello = new Othello(OthelloPlayerWithMoveList.class, OthelloPlayerWithMoveList.class);
+        String s;
+
+        // f4 is illegal
+        Iterator<Othello.Board.Square> moves = ImmutableList.of("c4", "c5", "e6", "f5", "c6", "b5", "f4", "d6", "c3", "a4", "d7").
+                stream().
+                map(othello::getSquare).
+                iterator();
+
+        OthelloPlayerWithMoveList _black = (OthelloPlayerWithMoveList) othello.black;
+        OthelloPlayerWithMoveList _white = (OthelloPlayerWithMoveList) othello.white;
+        _black.setIterator(moves);
+        _white.setIterator(moves);
+
+        othello.nextPly();
+        s = "        " +
+            "        " +
+            "        " +
+            "  bbb   " +
+            "   bw   " +
+            "        " +
+            "        " +
+            "        " +
+            "        ";
+        assertThat(othello.board, new OthelloBoardMatcher(s));
+        assertEquals(currentField.get(othello), othello.white);
+
+        othello.nextPly();
+        s = "        " +
+            "        " +
+            "        " +
+            "  bbb   " +
+            "  www   " +
+            "        " +
+            "        " +
+            "        " +
+            "        ";
+        assertThat(othello.board, new OthelloBoardMatcher(s));
+        assertEquals(currentField.get(othello), othello.black);
+
+        othello.nextPly();
+        s = "        " +
+            "        " +
+            "        " +
+            "  bbb   " +
+            "  wbb   " +
+            "    b   " +
+            "        " +
+            "        " +
+            "        ";
+        assertThat(othello.board, new OthelloBoardMatcher(s));
+        assertEquals(currentField.get(othello), othello.white);
+
+        othello.nextPly();
+        s = "        " +
+            "        " +
+            "        " +
+            "  bbb   " +
+            "  wwww  " +
+            "    b   " +
+            "        " +
+            "        " +
+            "        ";
+        assertThat(othello.board, new OthelloBoardMatcher(s));
+        assertEquals(currentField.get(othello), othello.black);
+
+        othello.nextPly();
+        s = "        " +
+            "        " +
+            "        " +
+            "  bbb   " +
+            "  bbww  " +
+            "  b b   " +
+            "        " +
+            "        " +
+            "        ";
+        assertThat(othello.board, new OthelloBoardMatcher(s));
+        assertEquals(currentField.get(othello), othello.white);
+
+        othello.nextPly();
+        s = "        " +
+            "        " +
+            "        " +
+            "  bbb   " +
+            " wwwww  " +
+            "  b b   " +
+            "        " +
+            "        " +
+            "        ";
+        assertThat(othello.board, new OthelloBoardMatcher(s));
+        assertEquals(currentField.get(othello), othello.black);
+
+        othello.nextPly();
+        s = "        " +
+            "        " +
+            "        " +
+            "  bbb   " +
+            " wwbww  " +
+            "  bbb   " +
+            "        " +
+            "        " +
+            "        ";
+        assertThat(othello.board, new OthelloBoardMatcher(s));
+        assertEquals(currentField.get(othello), othello.white);
+
+        othello.nextPly();
+        s = "        " +
+            "        " +
+            "  w     " +
+            "  wwb   " +
+            " wwbww  " +
+            "  bbb   " +
+            "        " +
+            "        " +
+            "        ";
+        assertThat(othello.board, new OthelloBoardMatcher(s));
+        assertEquals(currentField.get(othello), othello.black);
+
+        othello.nextPly();
+        s = "        " +
+            "        " +
+            "  w     " +
+            "b wwb   " +
+            " bwbww  " +
+            "  bbb   " +
+            "        " +
+            "        " +
+            "        ";
+        assertThat(othello.board, new OthelloBoardMatcher(s));
+        assertEquals(currentField.get(othello), othello.white);
+
+        othello.nextPly();
+        s = "        " +
+            "        " +
+            "  w     " +
+            "b wwb   " +
+            " bwwww  " +
+            "  bww   " +
+            "   w    " +
+            "        " +
+            "        ";
+        assertThat(othello.board, new OthelloBoardMatcher(s));
+        assertEquals(currentField.get(othello), othello.black);
+    }
+
+
+    @Test
     public void testGetSquare() {
+        othello = new Othello();
+
         assertSame(othello.board.grid[0][0], othello.board.getSquare("a1"));
         assertSame(othello.board.grid[6][4], othello.board.getSquare("E7"));
         assertSame(othello.board.grid[7][7], othello.board.getSquare("h8"));
@@ -60,6 +209,8 @@ public class OthelloTest {
 
     @Test
     public void testIsLegalMoveForColor() throws Exception {
+        othello = new Othello();
+
         String s;
         Othello.Board.Square square;
 
@@ -88,6 +239,8 @@ public class OthelloTest {
 
     @Test
     public void testGetMooreNeighborhood() throws Exception {
+        othello = new Othello();
+
         Othello.Board.Square square;
         Set<Othello.Board.Square> expected, actual;
 
@@ -110,6 +263,7 @@ public class OthelloTest {
 
     @Test
     public void testSetPiece() {
+        othello = new Othello();
         Othello.Board board = othello.board;
 
         assumeThat(board, new OthelloBoardMatcher(new HashMap<Othello.Color, Set<String>>() {{
@@ -141,6 +295,7 @@ public class OthelloTest {
 
     @Test
     public void testGetMovesFor() throws Exception {
+        othello = new Othello();
         Set<Othello.Board.Square> expected;
 
         expected = Sets.newHashSet("d3", "c4", "f5", "e6")
@@ -163,6 +318,8 @@ public class OthelloTest {
 
     @Test
     public void testIsGameOver() throws Exception {
+        othello = new Othello();
+
         String s;
 
         s = "       b" +
@@ -233,6 +390,25 @@ public class OthelloTest {
     class OthelloBoardMatcher extends BaseMatcher<Othello.Board> {
 
         Map<Othello.Board.Square, Othello.Color> pieces;
+
+        public OthelloBoardMatcher(String boardString) {
+            this(new HashMap<Color, Set<String>>() {{
+                this.put(Color.BLACK, Sets.newHashSet());
+                this.put(Color.WHITE, Sets.newHashSet());
+
+                for (int rank = 0; rank < othello.board.SQUARES_PER_SIDE; ++rank) {
+                    for (int file = 0; file < othello.board.SQUARES_PER_SIDE; ++file) {
+                        char c = boardString.charAt(rank * othello.board.SQUARES_PER_SIDE + file);
+                        if (c == 'b' || c == 'B') {
+                            this.get(Color.BLACK).add("" + (char)('a' + file) + (rank + 1));
+                        }
+                        else if (c == 'w' || c == 'W') {
+                            this.get(Color.WHITE).add("" + (char)('a' + file) + (rank + 1));
+                        }
+                    }
+                }
+            }});
+        }
 
         public OthelloBoardMatcher(Map<Othello.Color, Set<String>> pieceslist) {
             pieces = Maps.newHashMap();
