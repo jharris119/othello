@@ -35,6 +35,10 @@ public class Othello {
             Board.Square::get_s, Board.Square::get_sw, Board.Square::get_w, Board.Square::get_nw
     );
 
+    public Othello() {
+        this(OthelloPlayerWithKeyboard.class, OthelloPlayerWithKeyboard.class);
+    }
+
     public Othello(Class<? extends OthelloPlayer> blacktype, Class<? extends OthelloPlayer> whitetype) {
         board = new Board();
 
@@ -125,8 +129,9 @@ public class Othello {
             return (OthelloPlayer) ctor.newInstance(this, color);
         }
         catch(NoSuchMethodException|InvocationTargetException|InstantiationException|IllegalAccessException e) {
-            return new OthelloPlayerWithKeyboard(this, color);
+            e.printStackTrace();
         }
+        return new OthelloPlayerWithKeyboard(this, color);
     }
 
     /**
