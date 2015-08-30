@@ -16,7 +16,6 @@ hs_err_pid*
 
 *.iml
 
-build/*
 
 ## Directory-based project format:
 .idea/
@@ -37,7 +36,6 @@ build/*
 # Gradle:
 # .idea/gradle.xml
 # .idea/libraries
-.gradle
 
 # Mongo Explorer plugin:
 # .idea/mongoSettings.xml
