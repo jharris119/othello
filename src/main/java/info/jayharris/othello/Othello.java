@@ -412,7 +412,7 @@ public class Othello {
     }
 
     public static void main(String... args) {
-        Othello o = new Othello(OthelloPlayerWithKeyboard.class, OthelloPlayerWithKeyboard.class);
+        Othello o = new Othello(OthelloPlayerWithKeyboard.class, OthelloPlayerArbitraryMove.class);
         o.play();
         System.out.println(o.board);
     }
