@@ -190,6 +190,30 @@ public class OthelloTest {
         assertEquals(currentField.get(othello), othello.black);
     }
 
+    @Test
+    public void testCountWhiteOverBlack() throws Exception {
+        othello = new Othello();
+
+        int whites = 0, blacks = 0;
+        StringBuilder s = new StringBuilder();
+        for (int i = 0; i < Math.pow(othello.board.SQUARES_PER_SIDE, 2); ++i) {
+            if (Math.random() < 0.25) {
+                s.append(' ');
+            }
+            else if (Math.random() < 0.5) {
+                s.append('b');
+                ++blacks;
+            }
+            else {
+                s.append('w');
+                ++whites;
+            }
+        }
+
+        boardField.set(othello, OthelloBoardBuilder.build(othello, s.toString()));
+        assertEquals(whites - blacks, othello.countWhiteOverBlack());
+    }
+
 
     @Test
     public void testGetSquare() {

@@ -80,19 +80,32 @@ public class Othello {
             nextPly();
         }
 
-        int whitecount = 0, blackcount = 0;
+        int count = countWhiteOverBlack();
+        return count == 0 ? null : count > 0 ? white : black;
+    }
+
+    /**
+     * Counts how many more white pieces than black pieces there are on the
+     * board.
+     *
+     * @return the number of white pieces on the board minus the number of
+     * black pieces on the board
+     */
+    public int countWhiteOverBlack() {
+        int count = 0;
         for (int rank = 0; rank < board.SQUARES_PER_SIDE; ++rank) {
             for (int file = 0; file < board.SQUARES_PER_SIDE; ++file) {
                 Color color = board.getSquare(rank, file).getColor();
                 if (color == Color.WHITE) {
-                    ++whitecount;
+                    ++count;
                 }
                 else if (color == Color.BLACK) {
-                    ++blackcount;
+                    --count;
                 }
             }
         }
-        return whitecount < blackcount ? white : (blackcount > whitecount ? black : null);
+
+        return count;
     }
 
     protected void nextPly() {
