@@ -8,7 +8,7 @@ import static org.junit.Assert.*;
 
 public class OthelloPlayerRandomMoveTest {
 
-    Field currentField;
+    static Field currentField;
 
     public OthelloPlayerRandomMoveTest() throws Exception {
         currentField = Othello.class.getDeclaredField("current");
