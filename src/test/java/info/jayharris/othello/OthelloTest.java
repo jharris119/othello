@@ -386,30 +386,6 @@ public class OthelloTest {
         assertTrue(othello.isGameOver());
     }
 
-    static class OthelloBoardBuilder {
-        public static Othello.Board build(Othello othello, String str) throws Exception {
-            Othello.Board board = othello.new Board();
-
-            int rank = 0, file = 0;
-            for (char c : str.toCharArray()) {
-                Color color = null;
-                if (c == 'b' || c == 'B') {
-                    color = Color.BLACK;
-                }
-                else if (c == 'w' || c == 'W') {
-                    color = Color.WHITE;
-                }
-                squareSetPieceMethod.invoke(board.getSquare(rank, file), color);
-
-                file = (file + 1) % board.SQUARES_PER_SIDE;
-                if (file == 0) {
-                    ++rank;
-                }
-            }
-            return board;
-        }
-    }
-
     class OthelloBoardMatcher extends BaseMatcher<Othello.Board> {
 
         Map<Othello.Board.Square, Othello.Color> pieces;

@@ -71,17 +71,73 @@ public class Othello {
      * @return the winner, or {@code null} if a tie
      */
     public OthelloPlayer play() {
-        while (!isGameOver()) {
-            // at least one player has legal moves, if it's not the current player then skip their turn
-            if (!hasMovesFor(current.color)) {
-                current = (current == white ? black : white);
-
-            }
-            nextPly();
-        }
+        while (nextPly()) {
+            // noop
+        };
 
         int count = countWhiteOverBlack();
         return count == 0 ? null : count > 0 ? white : black;
+    }
+
+    /**
+     * Play the next ply of the game, then set the current player to the
+     * correct player.
+     *
+     * @return false iff the game is over
+     */
+    protected boolean nextPly() {
+        Preconditions.checkState(hasMovesFor(current));
+
+        Board.Square move;
+        do {
+            move = current.getMove();
+        } while (!board.setPiece(move, current.color));
+
+        current = (current == white ? black : white);
+        if (hasMovesFor(current)) {
+            return true;
+        }
+        current = (current == white ? black : white);
+        return hasMovesFor(current);
+    }
+
+    /**
+     * Gets the current player.
+     *
+     * @return the current player
+     */
+    public OthelloPlayer getCurrentPlayer() {
+        return current;
+    }
+
+    protected Set<Board.Square> getMovesFor(OthelloPlayer player) {
+        Preconditions.checkArgument(player.othello == this);
+
+        return getMovesFor(player.color);
+    }
+
+    protected Set<Board.Square> getMovesFor(Color color) {
+        Set<Board.Square> moves = Sets.newHashSet();
+        fringeAdjacent.forEach((square) -> {
+            if (board.isLegalMoveForColor(square, color)) {
+                moves.add(square);
+            }
+        });
+        return moves;
+    }
+
+    protected boolean hasMovesFor(OthelloPlayer player) {
+        Preconditions.checkArgument(player.othello == this);
+
+        return hasMovesFor(player.color);
+    }
+
+    protected boolean hasMovesFor(Color color) {
+        return fringeAdjacent.stream().anyMatch((square) -> board.isLegalMoveForColor(square, color));
+    }
+
+    public boolean isGameOver() {
+        return !(hasMovesFor(Color.BLACK) || hasMovesFor(Color.WHITE));
     }
 
     /**
@@ -106,34 +162,6 @@ public class Othello {
         }
 
         return count;
-    }
-
-    protected void nextPly() {
-        Preconditions.checkState(hasMovesFor(current.color));
-
-        Board.Square move;
-        do {
-            move = current.getMove();
-        } while (!board.setPiece(move, current.color));
-        current = (current == white ? black : white);
-    }
-
-    protected Set<Board.Square> getMovesFor(Color color) {
-        Set<Board.Square> moves = Sets.newHashSet();
-        fringeAdjacent.forEach((square) -> {
-            if (board.isLegalMoveForColor(square, color)) {
-                moves.add(square);
-            }
-        });
-        return moves;
-    }
-
-    protected boolean hasMovesFor(Color color) {
-        return !getMovesFor(color).isEmpty();
-    }
-
-    public boolean isGameOver() {
-        return !(hasMovesFor(Color.BLACK) || hasMovesFor(Color.WHITE));
     }
 
     private OthelloPlayer buildPlayer(Class<? extends OthelloPlayer> type, Color color) {
