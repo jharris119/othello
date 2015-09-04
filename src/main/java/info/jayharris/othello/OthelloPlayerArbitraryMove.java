@@ -6,6 +6,6 @@ public class OthelloPlayerArbitraryMove extends OthelloPlayer {
 
     @Override
     public Othello.Board.Square getMove() {
-        return othello.getMovesFor(color).iterator().next();
+        return othello.getMovesFor(this).iterator().next();
     }
 }

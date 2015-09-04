@@ -1,6 +1,18 @@
 package info.jayharris.othello;
 
+import java.lang.reflect.Method;
+
 class OthelloBoardBuilder {
+
+    static Method squareSetPieceMethod;
+
+    static {
+        try {
+            squareSetPieceMethod = Othello.Board.Square.class.getDeclaredMethod("setPiece", Othello.Color.class);
+            squareSetPieceMethod.setAccessible(true);
+        } catch (NoSuchMethodException e) { }
+    }
+
     public static Othello.Board build(Othello othello, String str) throws Exception {
         Othello.Board board = othello.new Board();
 
@@ -12,7 +24,7 @@ class OthelloBoardBuilder {
             } else if (c == 'w' || c == 'W') {
                 color = Othello.Color.WHITE;
             }
-            OthelloTest.squareSetPieceMethod.invoke(board.getSquare(rank, file), color);
+            squareSetPieceMethod.invoke(board.getSquare(rank, file), color);
 
             file = (file + 1) % board.SQUARES_PER_SIDE;
             if (file == 0) {
@@ -22,11 +34,17 @@ class OthelloBoardBuilder {
         return board;
     }
 
-    public static Othello.Board buildReal(Othello othello, String str, int halfplies) {
+    public static Othello.Board buildReal() {
+        return buildReal(Integer.MAX_VALUE);
+    }
+
+    public static Othello.Board buildReal(int halfplies) {
         Othello testOthello = new Othello(OthelloPlayerRandomMove.class, OthelloPlayerRandomMove.class);
 
-        for (int i = 0; i < halfplies && !othello.isGameOver(); ++i) {
-            othello.nextPly();
+        for (int i = 0; i < halfplies; ++i) {
+            if(!testOthello.nextPly()) {
+                break;
+            }
         }
 
         return testOthello.board;

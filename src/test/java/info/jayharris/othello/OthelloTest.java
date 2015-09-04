@@ -11,7 +11,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,7 +23,6 @@ public class OthelloTest {
     Othello othello;
 
     static Field boardField, fringeAdjacentField, currentField;
-    static Method squareSetPieceMethod;
 
     public OthelloTest() throws Exception {
         boardField = Othello.class.getDeclaredField("board");
@@ -32,9 +30,6 @@ public class OthelloTest {
 
         fringeAdjacentField = Othello.class.getDeclaredField("fringeAdjacent");
         fringeAdjacentField.setAccessible(true);
-
-        squareSetPieceMethod = Othello.Board.Square.class.getDeclaredMethod("setPiece", Color.class);
-        squareSetPieceMethod.setAccessible(true);
 
         currentField = Othello.class.getDeclaredField("current");
         currentField.setAccessible(true);
@@ -211,7 +206,7 @@ public class OthelloTest {
         }
 
         boardField.set(othello, OthelloBoardBuilder.build(othello, s.toString()));
-        assertEquals(whites - blacks, othello.countWhiteOverBlack());
+        assertEquals(whites - blacks, othello.board.countWhiteOverBlack());
     }
 
 
@@ -325,7 +320,7 @@ public class OthelloTest {
                 .stream()
                 .map((str) -> othello.board.getSquare(str))
                 .collect(Collectors.toSet());
-        assertEquals(expected, othello.getMovesFor(Color.BLACK));
+        assertEquals(expected, othello.board.getMovesFor(Color.BLACK));
 
         othello.board.setPiece(othello.getSquare("d3"), Color.BLACK);
         othello.board.setPiece(othello.getSquare("c3"), Color.WHITE);
@@ -336,7 +331,7 @@ public class OthelloTest {
                 .stream()
                 .map((str) -> othello.board.getSquare(str))
                 .collect(Collectors.toSet());
-        assertEquals(expected, othello.getMovesFor(Color.BLACK));
+        assertEquals(expected, othello.board.getMovesFor(Color.BLACK));
     }
 
     @Test

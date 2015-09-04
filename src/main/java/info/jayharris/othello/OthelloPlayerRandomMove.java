@@ -14,7 +14,7 @@ public class OthelloPlayerRandomMove extends OthelloPlayer {
 
     @Override
     public Othello.Board.Square getMove() {
-        Collection<Othello.Board.Square> moves = othello.getMovesFor(color);
+        Collection<Othello.Board.Square> moves = othello.getMovesFor(this);
 
         Preconditions.checkState(!moves.isEmpty());
 
