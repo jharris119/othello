@@ -75,7 +75,8 @@ public class Othello {
             // noop
         };
 
-        int count = countWhiteOverBlack();
+        board.noMoreMoves = true;
+        int count = board.countWhiteOverBlack();
         return count == 0 ? null : count > 0 ? white : black;
     }
 
@@ -113,31 +114,17 @@ public class Othello {
     protected Set<Board.Square> getMovesFor(OthelloPlayer player) {
         Preconditions.checkArgument(player.othello == this);
 
-        return getMovesFor(player.color);
-    }
-
-    protected Set<Board.Square> getMovesFor(Color color) {
-        Set<Board.Square> moves = Sets.newHashSet();
-        fringeAdjacent.forEach((square) -> {
-            if (board.isLegalMoveForColor(square, color)) {
-                moves.add(square);
-            }
-        });
-        return moves;
+        return board.getMovesFor(player.color);
     }
 
     protected boolean hasMovesFor(OthelloPlayer player) {
         Preconditions.checkArgument(player.othello == this);
 
-        return hasMovesFor(player.color);
-    }
-
-    protected boolean hasMovesFor(Color color) {
-        return fringeAdjacent.stream().anyMatch((square) -> board.isLegalMoveForColor(square, color));
+        return board.hasMovesFor(player.color);
     }
 
     public boolean isGameOver() {
-        return !(hasMovesFor(Color.BLACK) || hasMovesFor(Color.WHITE));
+        return board.noMoreMoves;
     }
 
     /**
@@ -194,6 +181,7 @@ public class Othello {
 
         final int SQUARES_PER_SIDE = 8;     // SQUARES_PER_SIDE should be even for symmetry's sake
         final Square[][] grid;
+        private boolean noMoreMoves = false;
 
         Board() {
             grid = new Square[SQUARES_PER_SIDE][SQUARES_PER_SIDE];
@@ -270,6 +258,32 @@ public class Othello {
         }
 
         /**
+         * Gets all squares that are legal moves for the given color.
+         *
+         * @param color the color
+         * @return a set of {@code Square}s that are legal moves for {@code color}
+         */
+        protected Set<Board.Square> getMovesFor(Color color) {
+            Set<Board.Square> moves = Sets.newHashSet();
+            fringeAdjacent.forEach((square) -> {
+                if (board.isLegalMoveForColor(square, color)) {
+                    moves.add(square);
+                }
+            });
+            return moves;
+        }
+
+        /**
+         * Determines if there exists a legal move for the given color.
+         *
+         * @param color the color
+         * @return {@code true} iff there is a legal move for {@code color}
+         */
+        protected boolean hasMovesFor(Color color) {
+            return fringeAdjacent.stream().anyMatch((square) -> isLegalMoveForColor(square, color));
+        }
+
+        /**
          * Flips all the opposite-colored discs in a given direction.
          *
          * More precisely, given {@code start} and {@code color}, finds the
@@ -296,6 +310,30 @@ public class Othello {
             }
             toFlip.forEach(Square::flip);
             return true;
+        }
+
+        /**
+         * Counts how many more white pieces than black pieces there are on the
+         * board.
+         *
+         * @return the number of white pieces on the board minus the number of
+         * black pieces on the board
+         */
+        public int countWhiteOverBlack() {
+            int count = 0;
+            for (int rank = 0; rank < SQUARES_PER_SIDE; ++rank) {
+                for (int file = 0; file < SQUARES_PER_SIDE; ++file) {
+                    Color color = getSquare(rank, file).getColor();
+                    if (color == Color.WHITE) {
+                        ++count;
+                    }
+                    else if (color == Color.BLACK) {
+                        --count;
+                    }
+                }
+            }
+
+            return count;
         }
 
         protected Square getSquare(String square) {
