@@ -207,7 +207,7 @@ public class Othello {
         }
 
         private void init(Set<Square> occupied) {
-            Preconditions.checkState(!occupied.isEmpty(), "Already initialized");
+            Preconditions.checkState(occupied.isEmpty(), "Already initialized");
 
             occupied.addAll(occupied);
             frontier.addAll(occupied.stream().filter(Square::isFrontier).collect(Collectors.toSet()));
@@ -217,7 +217,7 @@ public class Othello {
         }
 
         private void init() {
-            Preconditions.checkState(!occupied.isEmpty(), "Already initialized");
+            Preconditions.checkState(occupied.isEmpty(), "Already initialized");
 
             for (Square[] row : grid) {
                 for (Square square : row) {
