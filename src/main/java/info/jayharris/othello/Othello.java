@@ -8,19 +8,16 @@ import com.google.common.collect.Sets;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Othello {
 
-    final Board board;
-    final OthelloPlayer black, white;
+    protected final Board board;
+    protected final OthelloPlayer black, white;
     private OthelloPlayer current;
-
-    private final Set<Board.Square> occupied,
-                                    fringeAdjacent;     // the fringe is the set of discs bounded by at least one
-                                                        // empty square — this is a set of those empty squares
 
     public enum Color {
         BLACK, WHITE;
@@ -43,26 +40,15 @@ public class Othello {
         board = new Board();
 
         int p = board.SQUARES_PER_SIDE / 2 - 1;
-        board.grid[p][p].setPiece(Color.WHITE);
-        board.grid[p + 1][p].setPiece(Color.BLACK);
-        board.grid[p][p + 1].setPiece(Color.BLACK);
-        board.grid[p + 1][p + 1].setPiece(Color.WHITE);
-
-        occupied = new HashSet<Board.Square>() {{
-            this.add(board.grid[p][p]);
-            this.add(board.grid[p + 1][p]);
-            this.add(board.grid[p][p + 1]);
-            this.add(board.grid[p + 1][p + 1]);
-        }};
+        setPiece(p, p, Color.WHITE);
+        setPiece(p + 1, p, Color.BLACK);
+        setPiece(p, p + 1, Color.BLACK);
+        setPiece(p + 1, p + 1, Color.WHITE);
+        board.init();
 
         black = this.buildPlayer(blacktype, Color.BLACK);
         white = this.buildPlayer(whitetype, Color.WHITE);
         current = this.black;
-
-        fringeAdjacent = new HashSet<Board.Square>() {{
-            occupied.forEach((square) -> this.addAll(square.getMooreNeighborhood()));
-        }};
-        fringeAdjacent.removeIf(Board.Square::isOccupied);
     }
 
     /**
@@ -151,6 +137,10 @@ public class Othello {
         return count;
     }
 
+    private void setPiece(int rank, int file, Color color) {
+        board.forceSetPiece(rank, file, color);
+    }
+
     private OthelloPlayer buildPlayer(Class<? extends OthelloPlayer> type, Color color) {
         try {
             Constructor ctor = type.getConstructor(Othello.class, Othello.Color.class);
@@ -181,7 +171,9 @@ public class Othello {
 
         final int SQUARES_PER_SIDE = 8;     // SQUARES_PER_SIDE should be even for symmetry's sake
         final Square[][] grid;
-        private boolean noMoreMoves = false;
+        private boolean noMoreMoves = false, initialized = false;
+
+        private final Set<Board.Square> occupied, frontier, accessible;
 
         Board() {
             grid = new Square[SQUARES_PER_SIDE][SQUARES_PER_SIDE];
@@ -208,6 +200,65 @@ public class Othello {
                     }
                 }
             }
+
+            occupied = Sets.newHashSet();
+            frontier = Sets.newHashSet();
+            accessible = Sets.newHashSet();
+        }
+
+        private void init(Set<Square> occupied) {
+            Preconditions.checkState(!occupied.isEmpty(), "Already initialized");
+
+            occupied.addAll(occupied);
+            frontier.addAll(occupied.stream().filter(Square::isFrontier).collect(Collectors.toSet()));
+            frontier.forEach((square) -> {
+                accessible.addAll(square.getUnoccupiedNeighbors());
+            });
+        }
+
+        private void init() {
+            Preconditions.checkState(!occupied.isEmpty(), "Already initialized");
+
+            for (Square[] row : grid) {
+                for (Square square : row) {
+                    if (!square.isOccupied()) {
+                        continue;
+                    }
+
+                    occupied.add(square);
+                    if (square.isFrontier()) {
+                        frontier.add(square);
+                        accessible.remove(square);
+                        accessible.addAll(square.getUnoccupiedNeighbors());
+                    }
+                }
+            }
+        }
+
+        /**
+         * Puts a disc of the given color on the square at {@code rank, file},
+         * regardless of its legality.
+         *
+         * This method is intended to be used to set up the board during
+         * initialization.
+         *
+         * @param rank the rank {@code 0 <= rank < SQUARES_PER_SIDE}
+         * @param file the file {@code 0 <= file < SQUARES_PER_SIDE}
+         * @param color the color
+         * @return {@code true}
+         */
+        private boolean forceSetPiece(int rank, int file, Color color) {
+            Square square = Preconditions.checkNotNull(getSquare(rank, file));
+
+            square.color = color;
+            occupied.add(square);
+            if (square.isFrontier()) {
+                frontier.add(square);
+            }
+            accessible.remove(square);
+            accessible.addAll(square.getUnoccupiedNeighbors());
+
+            return true;
         }
 
         /**
@@ -218,16 +269,18 @@ public class Othello {
          * @param color the color
          * @return {@code true} iff this move is legal
          */
-        public boolean setPiece(Square square, Color color) {
+        private boolean setPiece(Square square, Color color) {
             Preconditions.checkArgument(square.getColor() == null);
             directions.forEach((direction) -> {
                 if (flipDiscsInDirection(square, color, direction)) {
                     square.setPiece(color);
 
-                    Set<Square> m = square.getMooreNeighborhood();
-                    m.removeIf(Square::isOccupied);
-                    fringeAdjacent.remove(square);
-                    fringeAdjacent.addAll(m);
+                    occupied.add(square);
+                    if (square.isFrontier()) {
+                        frontier.add(square);
+                        accessible.remove(square);
+                        accessible.addAll(square.getUnoccupiedNeighbors());
+                    }
                 }
             });
 
@@ -263,9 +316,10 @@ public class Othello {
          * @param color the color
          * @return a set of {@code Square}s that are legal moves for {@code color}
          */
+        @Deprecated
         protected Set<Board.Square> getMovesFor(Color color) {
             Set<Board.Square> moves = Sets.newHashSet();
-            fringeAdjacent.forEach((square) -> {
+            accessible.forEach((square) -> {
                 if (board.isLegalMoveForColor(square, color)) {
                     moves.add(square);
                 }
@@ -280,7 +334,7 @@ public class Othello {
          * @return {@code true} iff there is a legal move for {@code color}
          */
         protected boolean hasMovesFor(Color color) {
-            return fringeAdjacent.stream().anyMatch((square) -> isLegalMoveForColor(square, color));
+            return accessible.stream().anyMatch((square) -> isLegalMoveForColor(square, color));
         }
 
         /**
@@ -367,7 +421,9 @@ public class Othello {
             private Color color;
 
             private Square _n, _ne, _e, _se, _s, _sw, _w, _nw;
-            private Set<Square> neighbors = null;
+
+            private Predicate<Square> isOccupiedP = Square::isOccupied,
+                                      isFrontierP = Square::isFrontier;
 
             Square(final int rank, final int file) {
                 this.rank = rank;
@@ -391,25 +447,45 @@ public class Othello {
             }
 
             /**
-             * Gets the {@link Square}s in this {@code Square}'s Moore neighborhood.
+             * Gets the {@link Square}s adjacent to {@code this} that are unoccupied.
              *
-             * @return a set of {@code Square}s adjacent to this
+             * @return a set of adjacent, unoccupied {@code Square}s
              */
-            public Set<Square> getMooreNeighborhood() {
-                if (neighbors == null) {
-                    neighbors = Sets.newHashSet(_n, _ne, _e, _se, _s, _sw, _w, _nw);
-                    neighbors.removeIf(Objects::isNull);
-                }
-                return neighbors;
+            public Set<Square> getUnoccupiedNeighbors() {
+                return directions.stream().
+                        map((dir) -> dir.apply(this)).
+                        filter(Objects::nonNull).
+                        filter(isOccupiedP.negate()).
+                        collect(Collectors.toSet());
             }
 
             /**
-             * Gets whether this square has already been played.
+             * Gets whether this square is occupied.
              *
              * @return {@code true} iff this square has a disc on it
              */
             public boolean isOccupied() {
                 return this.getColor() != null;
+            }
+
+            /**
+             * Gets whether this a frontier square, meaning that it's a occupied
+             * square adjacent to at least one unoccupied square.
+             *
+             * @return {@code true} iff this square is a frontier square
+             */
+            public boolean isFrontier() {
+                if (!isOccupied()) {
+                    return false;
+                }
+
+                Square neighbor;
+                for (Function<Square, Square> direction : directions) {
+                    if ((neighbor = direction.apply(this)) != null && !neighbor.isOccupied()) {
+                        return true;
+                    }
+                }
+                return false;
             }
 
             /* ****************************************************************
@@ -459,6 +535,10 @@ public class Othello {
                 return _nw;
             }
 
+            public String getAlgebraicNotation() {
+                return new StringBuilder().append((char) ('a' + rank)).append(file + 1).toString();
+            }
+
             @Override
             public String toString() {
                 return "Square{" +
@@ -469,6 +549,7 @@ public class Othello {
             }
 
         }
+
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();

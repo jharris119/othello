@@ -13,7 +13,13 @@ class OthelloBoardBuilder {
         } catch (NoSuchMethodException e) { }
     }
 
-    public static Othello.Board build(Othello othello, String str) throws Exception {
+    public Othello othello;
+
+    public OthelloBoardBuilder(Othello othello) {
+        this.othello = othello;
+    }
+
+    public Othello.Board build(String str) throws Exception {
         Othello.Board board = othello.new Board();
 
         int rank = 0, file = 0;
@@ -34,11 +40,11 @@ class OthelloBoardBuilder {
         return board;
     }
 
-    public static Othello.Board buildReal() {
+    public Othello.Board buildReal() {
         return buildReal(Integer.MAX_VALUE);
     }
 
-    public static Othello.Board buildReal(int halfplies) {
+    public Othello.Board buildReal(int halfplies) {
         Othello testOthello = new Othello(OthelloPlayerRandomMove.class, OthelloPlayerRandomMove.class);
 
         for (int i = 0; i < halfplies; ++i) {

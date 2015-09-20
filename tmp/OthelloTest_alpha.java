@@ -18,18 +18,15 @@ import static info.jayharris.othello.Othello.*;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeThat;
 
-public class OthelloTest {
+public class OthelloTest_alpha {
 
     Othello othello;
 
-    static Field boardField, fringeAdjacentField, currentField;
+    static Field boardField, currentField;
 
-    public OthelloTest() throws Exception {
+    public OthelloTest_alpha() throws Exception {
         boardField = Othello.class.getDeclaredField("board");
         boardField.setAccessible(true);
-
-        fringeAdjacentField = Othello.class.getDeclaredField("fringeAdjacent");
-        fringeAdjacentField.setAccessible(true);
 
         currentField = Othello.class.getDeclaredField("current");
         currentField.setAccessible(true);
@@ -279,107 +276,107 @@ public class OthelloTest {
         assertEquals(expected, actual);
     }
 
-    @Test
-    public void testSetPiece() {
-        othello = new Othello();
-        Othello.Board board = othello.board;
+//    @Test
+//    public void testSetPiece() {
+//        othello = new Othello();
+//        Othello.Board board = othello.board;
+//
+//        assumeThat(board, new OthelloBoardMatcher(new HashMap<Othello.Color, Set<String>>() {{
+//            this.put(Color.BLACK, ImmutableSet.of("d5", "e4"));
+//            this.put(Color.WHITE, ImmutableSet.of("d4", "e5"));
+//        }}));
+//
+//        assertTrue(board.setPiece(board.getSquare("c4"), Color.BLACK));
+//        assertThat(board, new OthelloBoardMatcher(new HashMap<Othello.Color, Set<String>>() {{
+//            this.put(Color.BLACK, ImmutableSet.of("c4", "d4", "e4", "d5"));
+//            this.put(Color.WHITE, ImmutableSet.of("e5"));
+//        }}));
+//
+//        assertTrue(board.setPiece(board.getSquare("e3"), Color.WHITE));
+//        assertThat(board, new OthelloBoardMatcher(new HashMap<Othello.Color, Set<String>>() {{
+//            this.put(Color.BLACK, ImmutableSet.of("c4", "d4", "d5"));
+//            this.put(Color.WHITE, ImmutableSet.of("e3", "e4", "e5"));
+//        }}));
+//
+//        // TODO: more complicated board configurations
+//
+//        // doesn't flip anything, assert false
+//        assertFalse(board.setPiece(board.getSquare("e6"), Color.BLACK));
+//        assertThat(board, new OthelloBoardMatcher(new HashMap<Othello.Color, Set<String>>() {{
+//            this.put(Color.BLACK, ImmutableSet.of("c4", "d4", "d5"));
+//            this.put(Color.WHITE, ImmutableSet.of("e3", "e4", "e5"));
+//        }}));
+//    }
 
-        assumeThat(board, new OthelloBoardMatcher(new HashMap<Othello.Color, Set<String>>() {{
-            this.put(Color.BLACK, ImmutableSet.of("d5", "e4"));
-            this.put(Color.WHITE, ImmutableSet.of("d4", "e5"));
-        }}));
+//    @Test
+//    public void testGetMovesFor() throws Exception {
+//        othello = new Othello();
+//        Set<Othello.Board.Square> expected;
+//
+//        expected = Sets.newHashSet("d3", "c4", "f5", "e6")
+//                .stream()
+//                .map((str) -> othello.board.getSquare(str))
+//                .collect(Collectors.toSet());
+//        assertEquals(expected, othello.board.getMovesFor(Color.BLACK));
+//
+//        othello.board.setPiece(othello.getSquare("d3"), Color.BLACK);
+//        othello.board.setPiece(othello.getSquare("c3"), Color.WHITE);
+//        othello.board.setPiece(othello.getSquare("c4"), Color.BLACK);
+//        othello.board.setPiece(othello.getSquare("e3"), Color.WHITE);
+//
+//        expected = Sets.newHashSet("b2", "c2", "d2", "e2", "f2", "f3", "f4", "f5", "f6")
+//                .stream()
+//                .map((str) -> othello.board.getSquare(str))
+//                .collect(Collectors.toSet());
+//        assertEquals(expected, othello.board.getMovesFor(Color.BLACK));
+//    }
 
-        assertTrue(board.setPiece(board.getSquare("c4"), Color.BLACK));
-        assertThat(board, new OthelloBoardMatcher(new HashMap<Othello.Color, Set<String>>() {{
-            this.put(Color.BLACK, ImmutableSet.of("c4", "d4", "e4", "d5"));
-            this.put(Color.WHITE, ImmutableSet.of("e5"));
-        }}));
-
-        assertTrue(board.setPiece(board.getSquare("e3"), Color.WHITE));
-        assertThat(board, new OthelloBoardMatcher(new HashMap<Othello.Color, Set<String>>() {{
-            this.put(Color.BLACK, ImmutableSet.of("c4", "d4", "d5"));
-            this.put(Color.WHITE, ImmutableSet.of("e3", "e4", "e5"));
-        }}));
-
-        // TODO: more complicated board configurations
-
-        // doesn't flip anything, assert false
-        assertFalse(board.setPiece(board.getSquare("e6"), Color.BLACK));
-        assertThat(board, new OthelloBoardMatcher(new HashMap<Othello.Color, Set<String>>() {{
-            this.put(Color.BLACK, ImmutableSet.of("c4", "d4", "d5"));
-            this.put(Color.WHITE, ImmutableSet.of("e3", "e4", "e5"));
-        }}));
-    }
-
-    @Test
-    public void testGetMovesFor() throws Exception {
-        othello = new Othello();
-        Set<Othello.Board.Square> expected;
-
-        expected = Sets.newHashSet("d3", "c4", "f5", "e6")
-                .stream()
-                .map((str) -> othello.board.getSquare(str))
-                .collect(Collectors.toSet());
-        assertEquals(expected, othello.board.getMovesFor(Color.BLACK));
-
-        othello.board.setPiece(othello.getSquare("d3"), Color.BLACK);
-        othello.board.setPiece(othello.getSquare("c3"), Color.WHITE);
-        othello.board.setPiece(othello.getSquare("c4"), Color.BLACK);
-        othello.board.setPiece(othello.getSquare("e3"), Color.WHITE);
-
-        expected = Sets.newHashSet("b2", "c2", "d2", "e2", "f2", "f3", "f4", "f5", "f6")
-                .stream()
-                .map((str) -> othello.board.getSquare(str))
-                .collect(Collectors.toSet());
-        assertEquals(expected, othello.board.getMovesFor(Color.BLACK));
-    }
-
-    @Test
-    public void testIsGameOver() throws Exception {
-        othello = new Othello();
-
-        String s;
-
-        s = "       b" +
-            "w w  w b" +
-            "wwwwwwbb" +
-            "wbwwwwbb" +
-            "wbwwbwbb" +
-            "wwwbwbbb" +
-            "  wbbbbb" +
-            "  wwbbbb";
-        boardField.set(othello, OthelloBoardBuilder.build(othello, s));
-        fringeAdjacentField.set(othello,
-                Sets.newHashSet("a1", "b1", "c1", "d1", "e1", "f1", "g1", "b2", "d2", "e2", "g7", "a7", "b7", "b8")
-                    .stream()
-                    .map((str) -> othello.board.getSquare(str))
-                    .collect(Collectors.toSet()));
-        assertFalse(othello.isGameOver());
-
-        s = "w bbbbbb" +
-            "wwbbbbbb" +
-            "wwwbbbbb" +
-            "wwbwbbbb" +
-            "wwwbwbbb" +
-            "wwbwbwbb" +
-            "wwbbwbwb" +
-            "wwwwwwww";
-        boardField.set(othello, OthelloBoardBuilder.build(othello, s));
-        fringeAdjacentField.set(othello, Collections.singleton(othello.getSquare("b1")));
-        assertTrue(othello.isGameOver());
-
-        s = "bbbbbbbb" +
-            "bwwwwwbb" +
-            "wbbwbbwb" +
-            "wbbbbwbb" +
-            "wbwbbwbb" +
-            "wwwwbbwb" +
-            "wwwwwbbb" +
-            "wbbbbbbb";
-        boardField.set(othello, OthelloBoardBuilder.build(othello, s));
-        fringeAdjacentField.set(othello, Collections.emptySet());
-        assertTrue(othello.isGameOver());
-    }
+//    @Test
+//    public void testIsGameOver() throws Exception {
+//        othello = new Othello();
+//
+//        String s;
+//
+//        s = "       b" +
+//            "w w  w b" +
+//            "wwwwwwbb" +
+//            "wbwwwwbb" +
+//            "wbwwbwbb" +
+//            "wwwbwbbb" +
+//            "  wbbbbb" +
+//            "  wwbbbb";
+//        boardField.set(othello, OthelloBoardBuilder.build(othello, s));
+//        fringeAdjacentField.set(othello,
+//                Sets.newHashSet("a1", "b1", "c1", "d1", "e1", "f1", "g1", "b2", "d2", "e2", "g7", "a7", "b7", "b8")
+//                    .stream()
+//                    .map((str) -> othello.board.getSquare(str))
+//                    .collect(Collectors.toSet()));
+//        assertFalse(othello.isGameOver());
+//
+//        s = "w bbbbbb" +
+//            "wwbbbbbb" +
+//            "wwwbbbbb" +
+//            "wwbwbbbb" +
+//            "wwwbwbbb" +
+//            "wwbwbwbb" +
+//            "wwbbwbwb" +
+//            "wwwwwwww";
+//        boardField.set(othello, OthelloBoardBuilder.build(othello, s));
+//        fringeAdjacentField.set(othello, Collections.singleton(othello.getSquare("b1")));
+//        assertTrue(othello.isGameOver());
+//
+//        s = "bbbbbbbb" +
+//            "bwwwwwbb" +
+//            "wbbwbbwb" +
+//            "wbbbbwbb" +
+//            "wbwbbwbb" +
+//            "wwwwbbwb" +
+//            "wwwwwbbb" +
+//            "wbbbbbbb";
+//        boardField.set(othello, OthelloBoardBuilder.build(othello, s));
+//        fringeAdjacentField.set(othello, Collections.emptySet());
+//        assertTrue(othello.isGameOver());
+//    }
 
     class OthelloBoardMatcher extends BaseMatcher<Othello.Board> {
 
