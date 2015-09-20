@@ -40,11 +40,10 @@ public class Othello {
         board = new Board();
 
         int p = board.SQUARES_PER_SIDE / 2 - 1;
-        setPiece(p, p, Color.WHITE);
-        setPiece(p + 1, p, Color.BLACK);
-        setPiece(p, p + 1, Color.BLACK);
-        setPiece(p + 1, p + 1, Color.WHITE);
-        board.init();
+        board.forceSetPiece(board.getSquare(p, p), Color.WHITE);
+        board.forceSetPiece(board.getSquare(p + 1, p), Color.BLACK);
+        board.forceSetPiece(board.getSquare(p, p + 1), Color.BLACK);
+        board.forceSetPiece(board.getSquare(p + 1, p + 1), Color.WHITE);
 
         black = this.buildPlayer(blacktype, Color.BLACK);
         white = this.buildPlayer(whitetype, Color.WHITE);
@@ -56,15 +55,15 @@ public class Othello {
      *
      * @return the winner, or {@code null} if a tie
      */
-    public OthelloPlayer play() {
-        while (nextPly()) {
-            // noop
-        };
-
-        board.noMoreMoves = true;
-        int count = board.countWhiteOverBlack();
-        return count == 0 ? null : count > 0 ? white : black;
-    }
+//    public OthelloPlayer play() {
+//        while (nextPly()) {
+//            // noop
+//        };
+//
+//        board.noMoreMoves = true;
+//        int count = board.countWhiteOverBlack();
+//        return count == 0 ? null : count > 0 ? white : black;
+//    }
 
     /**
      * Play the next ply of the game, then set the current player to the
@@ -72,21 +71,21 @@ public class Othello {
      *
      * @return false iff the game is over
      */
-    protected boolean nextPly() {
-        Preconditions.checkState(hasMovesFor(current));
-
-        Board.Square move;
-        do {
-            move = current.getMove();
-        } while (!board.setPiece(move, current.color));
-
-        current = (current == white ? black : white);
-        if (hasMovesFor(current)) {
-            return true;
-        }
-        current = (current == white ? black : white);
-        return hasMovesFor(current);
-    }
+//    protected boolean nextPly() {
+//        Preconditions.checkState(hasMovesFor(current));
+//
+//        Board.Square move;
+//        do {
+//            move = current.getMove();
+//        } while (!board.setPiece(move, current.color));
+//
+//        current = (current == white ? black : white);
+//        if (hasMovesFor(current)) {
+//            return true;
+//        }
+//        current = (current == white ? black : white);
+//        return hasMovesFor(current);
+//    }
 
     /**
      * Gets the current player.
@@ -95,50 +94,6 @@ public class Othello {
      */
     public OthelloPlayer getCurrentPlayer() {
         return current;
-    }
-
-    protected Set<Board.Square> getMovesFor(OthelloPlayer player) {
-        Preconditions.checkArgument(player.othello == this);
-
-        return board.getMovesFor(player.color);
-    }
-
-    protected boolean hasMovesFor(OthelloPlayer player) {
-        Preconditions.checkArgument(player.othello == this);
-
-        return board.hasMovesFor(player.color);
-    }
-
-    public boolean isGameOver() {
-        return board.noMoreMoves;
-    }
-
-    /**
-     * Counts how many more white pieces than black pieces there are on the
-     * board.
-     *
-     * @return the number of white pieces on the board minus the number of
-     * black pieces on the board
-     */
-    public int countWhiteOverBlack() {
-        int count = 0;
-        for (int rank = 0; rank < board.SQUARES_PER_SIDE; ++rank) {
-            for (int file = 0; file < board.SQUARES_PER_SIDE; ++file) {
-                Color color = board.getSquare(rank, file).getColor();
-                if (color == Color.WHITE) {
-                    ++count;
-                }
-                else if (color == Color.BLACK) {
-                    --count;
-                }
-            }
-        }
-
-        return count;
-    }
-
-    private void setPiece(int rank, int file, Color color) {
-        board.forceSetPiece(rank, file, color);
     }
 
     private OthelloPlayer buildPlayer(Class<? extends OthelloPlayer> type, Color color) {
@@ -171,7 +126,7 @@ public class Othello {
 
         final int SQUARES_PER_SIDE = 8;     // SQUARES_PER_SIDE should be even for symmetry's sake
         final Square[][] grid;
-        private boolean noMoreMoves = false, initialized = false;
+        private boolean noMoreMoves = false;
 
         private final Set<Board.Square> occupied, frontier, accessible;
 
@@ -206,164 +161,112 @@ public class Othello {
             accessible = Sets.newHashSet();
         }
 
-        private void init(Set<Square> occupied) {
-            Preconditions.checkState(occupied.isEmpty(), "Already initialized");
-
-            occupied.addAll(occupied);
-            frontier.addAll(occupied.stream().filter(Square::isFrontier).collect(Collectors.toSet()));
-            frontier.forEach((square) -> {
-                accessible.addAll(square.getUnoccupiedNeighbors());
-            });
-        }
-
-        private void init() {
-            Preconditions.checkState(occupied.isEmpty(), "Already initialized");
-
-            for (Square[] row : grid) {
-                for (Square square : row) {
-                    if (!square.isOccupied()) {
-                        continue;
-                    }
-
-                    occupied.add(square);
-                    if (square.isFrontier()) {
-                        frontier.add(square);
-                        accessible.remove(square);
-                        accessible.addAll(square.getUnoccupiedNeighbors());
-                    }
-                }
-            }
-        }
-
         /**
-         * Puts a disc of the given color on the square at {@code rank, file},
-         * regardless of its legality.
-         *
-         * This method is intended to be used to set up the board during
-         * initialization.
-         *
-         * @param rank the rank {@code 0 <= rank < SQUARES_PER_SIDE}
-         * @param file the file {@code 0 <= file < SQUARES_PER_SIDE}
-         * @param color the color
-         * @return {@code true}
-         */
-        private boolean forceSetPiece(int rank, int file, Color color) {
-            Square square = Preconditions.checkNotNull(getSquare(rank, file));
-
-            square.color = color;
-            occupied.add(square);
-            if (square.isFrontier()) {
-                frontier.add(square);
-            }
-            accessible.remove(square);
-            accessible.addAll(square.getUnoccupiedNeighbors());
-
-            return true;
-        }
-
-        /**
-         * Puts a disc of the given color on this square, if legal, and flip
+         * Put a {@code color} disc on {@code square}, if legal, and flip
          * the necessary discs.
          *
          * @param square the square
          * @param color the color
-         * @return {@code true} iff this move is legal
+         * @return {@code true} iff {@code square} is a legal move for {@code color}
          */
-        private boolean setPiece(Square square, Color color) {
+        protected boolean setPiece(Square square, Color color) {
+            Preconditions.checkNotNull(square);
             Preconditions.checkArgument(square.getColor() == null);
-            directions.forEach((direction) -> {
-                if (flipDiscsInDirection(square, color, direction)) {
-                    square.setPiece(color);
 
-                    occupied.add(square);
-                    if (square.isFrontier()) {
-                        frontier.add(square);
-                        accessible.remove(square);
-                        accessible.addAll(square.getUnoccupiedNeighbors());
-                    }
-                }
-            });
-
-            return square.getColor() != null;
+            return setPiece(square, color, false);
         }
 
-        /**
-         * Determines if {@code square} is a legal move for {@code color}.
-         *
-         * @param square the square
-         * @param color the color
-         * @return {@code true} iff there is at least one opposite-colored
-         * disc in a straight line between this square and a same-colored disc
-         */
-        protected boolean isLegalMoveForColor(Square square, Color color) {
-            for (Function<Square, Square> direction : directions) {
-                Square current = direction.apply(square);
-                if (current != null && current.getColor() == color.opposite()) {
-                    do {
-                        current = direction.apply(current);
-                    } while (current != null && current.getColor() == color.opposite());
-                    if (current != null && current.getColor() == color) {
-                        return true;
-                    }
+        private boolean forceSetPiece(Square square, Color color) {
+            Preconditions.checkNotNull(square);
+
+            return setPiece(square, color, true);
+        }
+
+        private boolean setPiece(Square square, Color color, boolean force) {
+            Set<Square> toFlip = getSquaresToFlip(square, color);
+            if (!toFlip.isEmpty() || force) {
+                square.setPiece(color);
+                toFlip.forEach(Square::flip);
+
+                occupied.add(square);
+                accessible.remove(square);
+                if (square.isFrontier()) {
+                    frontier.add(square);
+                    accessible.addAll(square.getUnoccupiedNeighbors());
                 }
+
+                return true;
             }
             return false;
         }
 
         /**
-         * Gets all squares that are legal moves for the given color.
+         * Determine if {@code square} is a legal move for {@code color}
          *
+         * @param square the square
          * @param color the color
-         * @return a set of {@code Square}s that are legal moves for {@code color}
+         * @return {@code true} iff {@code square} is a legal move for {@code color}
          */
-        @Deprecated
-        protected Set<Board.Square> getMovesFor(Color color) {
-            Set<Board.Square> moves = Sets.newHashSet();
-            accessible.forEach((square) -> {
-                if (board.isLegalMoveForColor(square, color)) {
-                    moves.add(square);
-                }
-            });
-            return moves;
+        protected boolean isLegal(Square square, Color color) {
+            Preconditions.checkNotNull(square);
+
+            return !square.isOccupied() && directions.stream().anyMatch((dir) ->
+                !this.getSquaresToFlip(square, color, dir).isEmpty()
+            );
         }
 
         /**
-         * Determines if there exists a legal move for the given color.
+         * Get the squares whose discs would be flipped if {@code color} were
+         * to play at {@code start}.
          *
-         * @param color the color
-         * @return {@code true} iff there is a legal move for {@code color}
+         * @param start the square to play
+         * @param color the color to play
+         * @return a set of {@code Square}s
          */
-        protected boolean hasMovesFor(Color color) {
-            return accessible.stream().anyMatch((square) -> isLegalMoveForColor(square, color));
+        protected Set<Square> getSquaresToFlip(Square start, Color color) {
+            Preconditions.checkNotNull(start);
+            Preconditions.checkArgument(start.getColor() == null);
+
+            Set<Square> toFlip = Sets.newHashSet();
+            for (Function<Square, Square> direction : directions) {
+                toFlip.addAll(getSquaresToFlip(start, color, direction));
+            }
+            return toFlip;
         }
 
         /**
-         * Flips all the opposite-colored discs in a given direction.
+         * Get the squares in {@code direction} whose discs would be flipped if
+         * {@code color} were to play at {@code start}.
          *
-         * More precisely, given {@code start} and {@code color}, finds the
-         * first {@code color}-ed disc <var>D</var> in a {@code direction}-ward
-         * line from {@code start}. If <var>D</var> exists, flip all the discs
-         * between {@code start} and <var>D</var>, exclusive.
-         *
-         * @param start the start square
-         * @param color the color
+         * @param start the square to play
+         * @param color the color to play
          * @param direction the direction
-         * @return {@code true} iff discs were flipped
+         * @return a (possibly empty) set of {@code Square}s
          */
-        protected boolean flipDiscsInDirection(Square start, Color color, Function<Square, Square> direction) {
+        // TODO: make me private
+        protected Set<Square> getSquaresToFlip(Square start, Color color, Function<Square, Square> direction) {
             Square current = direction.apply(start);
 
-            LinkedList<Square> toFlip = Lists.newLinkedList();
+            Set<Square> toFlip = Sets.newHashSet();
             while (current != null && current.getColor() == color.opposite()) {
                 toFlip.add(current);
                 current = direction.apply(current);
             }
 
-            if (current == null || current.getColor() != color || toFlip.isEmpty()) {
-                return false;
+            if (current == null || current.getColor() == null) {
+                toFlip.clear();
             }
-            toFlip.forEach(Square::flip);
-            return true;
+            return toFlip;
+        }
+
+        /**
+         * Determine if {@code color} has any legal moves
+         *
+         * @param color the color
+         * @return {@code true} iff {@code color} has at least one legal move
+         */
+        protected boolean hasMove(Color color) {
+            return accessible.stream().anyMatch((square) -> isLegal(square, color));
         }
 
         /**
@@ -390,6 +293,12 @@ public class Othello {
             return count;
         }
 
+        /**
+         * Get the square referenced by the given algebraic notation.
+         *
+         * @param square algebraic notation reference for the square
+         * @return the square
+         */
         protected Square getSquare(String square) {
             Pattern pattern = Pattern.compile("^([a-z])([1-9]\\d*)$");
             Matcher matcher = pattern.matcher(square.toLowerCase());
@@ -536,7 +445,7 @@ public class Othello {
             }
 
             public String getAlgebraicNotation() {
-                return new StringBuilder().append((char) ('a' + rank)).append(file + 1).toString();
+                return String.valueOf((char) ('a' + rank)) + (file + 1);
             }
 
             @Override
@@ -547,7 +456,6 @@ public class Othello {
                         ", color=" + color +
                         '}';
             }
-
         }
 
         @Override
@@ -571,9 +479,9 @@ public class Othello {
         }
     }
 
-    public static void main(String... args) {
-        Othello o = new Othello(OthelloPlayerWithKeyboard.class, OthelloPlayerArbitraryMove.class);
-        o.play();
-        System.out.println(o.board);
-    }
+//    public static void main(String... args) {
+//        Othello o = new Othello(OthelloPlayerWithKeyboard.class, OthelloPlayerArbitraryMove.class);
+//        o.play();
+//        System.out.println(o.board);
+//    }
 }
