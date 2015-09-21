@@ -2,7 +2,6 @@ package info.jayharris.othello;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import java.lang.reflect.Constructor;
@@ -126,8 +125,6 @@ public class Othello {
 
         final int SQUARES_PER_SIDE = 8;     // SQUARES_PER_SIDE should be even for symmetry's sake
         final Square[][] grid;
-        private boolean noMoreMoves = false;
-
         private final Set<Board.Square> occupied, frontier, accessible;
 
         Board() {
@@ -276,6 +273,7 @@ public class Othello {
          * @return the number of white pieces on the board minus the number of
          * black pieces on the board
          */
+        @Deprecated
         public int countWhiteOverBlack() {
             int count = 0;
             for (int rank = 0; rank < SQUARES_PER_SIDE; ++rank) {
@@ -322,6 +320,18 @@ public class Othello {
             Preconditions.checkArgument(file >= 0 && file < SQUARES_PER_SIDE);
 
             return grid[rank][file];
+        }
+
+        public Set<Square> getOccupied() {
+            return Collections.unmodifiableSet(occupied);
+        }
+
+        public Set<Square> getFrontier() {
+            return Collections.unmodifiableSet(frontier);
+        }
+
+        public Set<Square> getAccessible() {
+            return Collections.unmodifiableSet(accessible);
         }
 
         public class Square {
@@ -398,7 +408,7 @@ public class Othello {
             }
 
             /* ****************************************************************
-             * Reader methods
+             * Accessor methods
              * ****************************************************************/
             public int getRank() {
                 return rank;
