@@ -65,26 +65,38 @@ public class Othello {
 //    }
 
     /**
-     * Play the next ply of the game, then set the current player to the
-     * correct player.
+     * Play the next ply.
      *
-     * @return false iff the game is over
+     * That is, get the current player's next (legal) move, play it, and
+     * update the board state and game state.
+     *
+     * @return the player whose turn it is after this ply, or {@code null} if
+     *  neither player can move
      */
-//    protected boolean nextPly() {
-//        Preconditions.checkState(hasMovesFor(current));
-//
-//        Board.Square move;
-//        do {
-//            move = current.getMove();
-//        } while (!board.setPiece(move, current.color));
-//
-//        current = (current == white ? black : white);
-//        if (hasMovesFor(current)) {
-//            return true;
-//        }
-//        current = (current == white ? black : white);
-//        return hasMovesFor(current);
-//    }
+    protected OthelloPlayer nextPly() {
+        Board.Square move;
+        do {
+            move = current.getMove();
+        } while (!board.setPiece(move, current.color));
+
+        if (hasMoveFor(getOtherPlayer())) {
+            current = getOtherPlayer();
+        }
+        else if (!hasMoveFor(current)) {
+            current = null;
+        }
+        return current;
+    }
+
+    /**
+     * Determines if there's at least one legal move for {@code player}.
+     *
+     * @param player the play
+     * @return {@code true} iff there's at least one legal move for {@code player}
+     */
+    public boolean hasMoveFor(OthelloPlayer player) {
+        return board.hasMove(player.color);
+    }
 
     /**
      * Gets the current player.
@@ -93,6 +105,15 @@ public class Othello {
      */
     public OthelloPlayer getCurrentPlayer() {
         return current;
+    }
+
+    /**
+     * Gets the non-current player.
+     *
+     * @return the player who's not the current player
+     */
+    public OthelloPlayer getOtherPlayer() {
+        return current == white ? black : white;
     }
 
     private OthelloPlayer buildPlayer(Class<? extends OthelloPlayer> type, Color color) {
@@ -110,9 +131,9 @@ public class Othello {
      * Gets the square referred to via algebraic notation.
      *
      * Note that "a1" is the <i>upper</i>-left square, unlike in chess
-     * algebriac notation.
+     * algebraic notation.
      *
-     * @param square the square name, in algebriac notation
+     * @param square the square name, in algebraic notation
      * @return the square
      * @throws java.lang.IllegalArgumentException if the algebraic notation
      * is invalid or refers to a non-existent square
