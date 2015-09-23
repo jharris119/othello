@@ -49,20 +49,12 @@ public class Othello {
         current = this.black;
     }
 
-    /**
-     * Plays the game.
-     *
-     * @return the winner, or {@code null} if a tie
-     */
-//    public OthelloPlayer play() {
-//        while (nextPly()) {
-//            // noop
-//        };
-//
-//        board.noMoreMoves = true;
-//        int count = board.countWhiteOverBlack();
-//        return count == 0 ? null : count > 0 ? white : black;
-//    }
+    public OthelloPlayer play() {
+        while (nextPly() != null);
+
+        int count = board.count(Color.WHITE);
+        return count == 0 ? null : count > 0 ? white : black;
+    }
 
     /**
      * Plays the next ply.
@@ -288,27 +280,47 @@ public class Othello {
         }
 
         /**
-         * Counts how many more white pieces than black pieces there are on the
-         * board.
+         * Counts how many pieces black is winning by.
          *
-         * @return the number of white pieces on the board minus the number of
-         * black pieces on the board
+         * @return the number of black discs on the board less the number of
+         *  white discs
          */
-        @Deprecated
-        public int countWhiteOverBlack() {
+        public int count() {
+            return count(Color.BLACK);
+        }
+
+        /**
+         * Counts how many pieces {@code player} is winning by.
+         *
+         * @param player the player
+         * @return the number of {@code player}'s discs on the board less
+         *  the number of his opponent's discs
+         */
+        public int count(OthelloPlayer player) {
+            return count(player.color);
+        }
+
+        /**
+         * Counts how many pieces the {@code color} player is winning by.
+         *
+         * @param color the color
+         * @return the number of {@code color} discs on the board less the
+         *  number of {@code color.opposite()} discs
+         */
+        public int count(Color color) {
+            Color current;
             int count = 0;
             for (int rank = 0; rank < SQUARES_PER_SIDE; ++rank) {
                 for (int file = 0; file < SQUARES_PER_SIDE; ++file) {
-                    Color color = getSquare(rank, file).getColor();
-                    if (color == Color.WHITE) {
+                    current = getSquare(rank, file).getColor();
+                    if (current == color) {
                         ++count;
                     }
-                    else if (color == Color.BLACK) {
+                    else if (current == color.opposite()) {
                         --count;
                     }
                 }
             }
-
             return count;
         }
 
@@ -510,9 +522,9 @@ public class Othello {
         }
     }
 
-//    public static void main(String... args) {
-//        Othello o = new Othello(OthelloPlayerWithKeyboard.class, OthelloPlayerArbitraryMove.class);
-//        o.play();
-//        System.out.println(o.board);
-//    }
+    public static void main(String... args) {
+        Othello o = new Othello(OthelloPlayerWithKeyboard.class, OthelloPlayerWithKeyboard.class);
+        o.play();
+        System.out.println(o.board);
+    }
 }
