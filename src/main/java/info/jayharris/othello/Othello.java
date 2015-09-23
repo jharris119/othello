@@ -65,7 +65,7 @@ public class Othello {
 //    }
 
     /**
-     * Play the next ply.
+     * Plays the next ply.
      *
      * That is, get the current player's next (legal) move, play it, and
      * update the board state and game state.
@@ -180,7 +180,7 @@ public class Othello {
         }
 
         /**
-         * Put a {@code color} disc on {@code square}, if legal, and flip
+         * Puts a {@code color} disc on {@code square}, if legal, and flips
          * the necessary discs.
          *
          * @param square the square
@@ -219,7 +219,7 @@ public class Othello {
         }
 
         /**
-         * Determine if {@code square} is a legal move for {@code color}
+         * Determines if {@code square} is a legal move for {@code color}
          *
          * @param square the square
          * @param color the color
@@ -234,7 +234,7 @@ public class Othello {
         }
 
         /**
-         * Get the squares whose discs would be flipped if {@code color} were
+         * Gets the squares whose discs would be flipped if {@code color} were
          * to play at {@code start}.
          *
          * @param start the square to play
@@ -253,7 +253,7 @@ public class Othello {
         }
 
         /**
-         * Get the squares in {@code direction} whose discs would be flipped if
+         * Gets the squares in {@code direction} whose discs would be flipped if
          * {@code color} were to play at {@code start}.
          *
          * @param start the square to play
@@ -278,7 +278,7 @@ public class Othello {
         }
 
         /**
-         * Determine if {@code color} has any legal moves
+         * Determines if {@code color} has any legal moves
          *
          * @param color the color
          * @return {@code true} iff {@code color} has at least one legal move
@@ -313,7 +313,7 @@ public class Othello {
         }
 
         /**
-         * Get the square referenced by the given algebraic notation.
+         * Gets the square referenced by the given algebraic notation.
          *
          * @param square algebraic notation reference for the square
          * @return the square
