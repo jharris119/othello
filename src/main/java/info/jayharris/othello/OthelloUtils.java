@@ -3,15 +3,19 @@ package info.jayharris.othello;
 import com.google.common.collect.Iterables;
 import info.jayharris.othello.Othello.*;
 
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class OthelloUtils {
 
-    public static Set<Board.Square> getAllMoves(Othello othello, Color color) {
-        return getAllMoves(othello.board, color);
-    }
-
+    /**
+     * Gets all legal moves for {@code color} on the given board.
+     *
+     * @param board the board
+     * @param color the color
+     * @return a set of legal moves for {@code color} on {@code board}
+     */
     public static Set<Board.Square> getAllMoves(Board board, Color color) {
         return board.getAccessible().
                 stream().
@@ -19,15 +23,21 @@ public class OthelloUtils {
                 collect(Collectors.toSet());
     }
 
-    public static Board.Square getRandomMove(Othello othello, Color color, java.util.Random random) {
-        return getRandomMove(othello.board, color, random);
+    public static Board.Square getRandomMove(Othello othello, Color color) {
+        return getRandomMove(othello.board, color);
     }
 
-    public static Board.Square getRandomMove(Board board, Color color, java.util.Random random) {
-        if (random == null) {
-            random = new java.util.Random();
-        }
-
+    /**
+     * Gets a random legal move for {@code color} on the given board, assuming
+     * one exists.
+     *
+     * @param board the board
+     * @param color the color
+     * @return a legal move for {@code color} on {@code board}, or {@code null}
+     *  if no legal move exists
+     */
+    public static Board.Square getRandomMove(Board board, Color color) {
+        Random random = new Random();
         Set<Board.Square> moves = getAllMoves(board, color);
         if (moves.isEmpty()) {
             return null;
