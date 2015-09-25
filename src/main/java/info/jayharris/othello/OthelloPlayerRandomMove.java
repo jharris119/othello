@@ -1,10 +1,8 @@
 package info.jayharris.othello;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
 
 import java.util.Random;
-import java.util.Set;
 
 /**
  * An OthelloPlayer that returns a randomly-selected legal move.
