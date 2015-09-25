@@ -37,16 +37,28 @@ public class Othello {
 
     public Othello(Class<? extends OthelloPlayer> blacktype, Class<? extends OthelloPlayer> whitetype) {
         board = new Board();
+        initBoard();
 
+        black = this.buildPlayer(blacktype, Color.BLACK);
+        white = this.buildPlayer(whitetype, Color.WHITE);
+        current = this.black;
+    }
+
+    public Othello(OthelloPlayer black, OthelloPlayer white) {
+        board = new Board();
+        initBoard();
+
+        this.black = black;
+        this.white = white;
+        current = this.black;
+    }
+
+    private void initBoard() {
         int p = board.SQUARES_PER_SIDE / 2 - 1;
         board.forceSetPiece(board.getSquare(p, p), Color.WHITE);
         board.forceSetPiece(board.getSquare(p + 1, p), Color.BLACK);
         board.forceSetPiece(board.getSquare(p, p + 1), Color.BLACK);
         board.forceSetPiece(board.getSquare(p + 1, p + 1), Color.WHITE);
-
-        black = this.buildPlayer(blacktype, Color.BLACK);
-        white = this.buildPlayer(whitetype, Color.WHITE);
-        current = this.black;
     }
 
     public OthelloPlayer play() {
