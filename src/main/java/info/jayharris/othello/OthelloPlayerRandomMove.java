@@ -1,5 +1,6 @@
 package info.jayharris.othello;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 
 import java.util.Random;
@@ -19,7 +20,6 @@ public class OthelloPlayerRandomMove extends OthelloPlayer {
 
     @Override
     public Othello.Board.Square getMove() {
-        Set<Othello.Board.Square> moves = OthelloUtils.getAllMoves(othello, color);
-        return Iterables.get(moves, random.nextInt(moves.size()));
+        return Preconditions.checkNotNull(OthelloUtils.getRandomMove(othello, color, random));
     }
 }
