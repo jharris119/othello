@@ -1,16 +1,21 @@
 package info.jayharris.othello;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 class OthelloBoardBuilder {
 
     static Method squareSetPieceMethod;
+    static Field boardField;
 
     static {
         try {
+            boardField = Othello.class.getDeclaredField("board");
+            boardField.setAccessible(true);
+
             squareSetPieceMethod = Othello.Board.Square.class.getDeclaredMethod("setPiece", Othello.Color.class);
             squareSetPieceMethod.setAccessible(true);
-        } catch (NoSuchMethodException e) { }
+        } catch (NoSuchMethodException|NoSuchFieldException e) { }
     }
 
     public Othello othello;
@@ -37,22 +42,8 @@ class OthelloBoardBuilder {
                 ++rank;
             }
         }
+
+        boardField.set(othello, board);
         return board;
-    }
-
-    public Othello.Board buildReal() {
-        return buildReal(Integer.MAX_VALUE);
-    }
-
-    public Othello.Board buildReal(int halfplies) {
-        Othello testOthello = new Othello(OthelloPlayerRandomMove.class, OthelloPlayerRandomMove.class);
-
-        for (int i = 0; i < halfplies; ++i) {
-            if(!testOthello.nextPly()) {
-                break;
-            }
-        }
-
-        return testOthello.board;
     }
 }
