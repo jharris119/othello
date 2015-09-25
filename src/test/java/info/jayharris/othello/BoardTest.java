@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
 public class BoardTest {
 
@@ -22,7 +23,9 @@ public class BoardTest {
 
     @Before
     public void setUp() throws Exception {
-        othello = new Othello(OthelloPlayerWithMoveList.class, OthelloPlayerWithMoveList.class);
+        OthelloPlayer black = mock(OthelloPlayer.class), white = mock(OthelloPlayer.class);
+
+        othello = new Othello(black, white);
         builder = new OthelloBoardBuilder(othello);
     }
 
