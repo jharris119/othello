@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+/**
+ * An OthelloPlayer that takes moves from keyboard input.
+ */
 public class OthelloPlayerWithKeyboard extends OthelloPlayer {
 
     BufferedReader reader;

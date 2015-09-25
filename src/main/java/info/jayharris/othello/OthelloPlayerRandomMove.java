@@ -6,6 +6,9 @@ import com.google.common.collect.Iterables;
 import java.util.Collection;
 import java.util.Random;
 
+/**
+ * An OthelloPlayer that returns a randomly-selected legal move.
+ */
 public class OthelloPlayerRandomMove extends OthelloPlayer {
 
     public OthelloPlayerRandomMove(Othello othello, Othello.Color color) {
