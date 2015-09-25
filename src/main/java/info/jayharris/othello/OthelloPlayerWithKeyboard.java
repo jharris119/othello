@@ -10,14 +10,10 @@ public class OthelloPlayerWithKeyboard extends OthelloPlayer {
     BufferedReader reader;
 
     public OthelloPlayerWithKeyboard(Othello othello, Othello.Color color) {
-        this(othello, color, System.in);
-    }
-
-    public OthelloPlayerWithKeyboard(Othello othello, Othello.Color color, InputStream input) {
         super(othello, color);
-        this.reader = new BufferedReader(new InputStreamReader(input));
+        this.reader = new BufferedReader(new InputStreamReader(System.in));
     }
-
+    
     @Override
     public Othello.Board.Square getMove() {
         System.out.println(othello.board);
