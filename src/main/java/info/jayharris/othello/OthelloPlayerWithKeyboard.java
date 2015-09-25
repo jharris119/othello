@@ -2,12 +2,20 @@ package info.jayharris.othello;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class OthelloPlayerWithKeyboard extends OthelloPlayer {
 
+    BufferedReader reader;
+
     public OthelloPlayerWithKeyboard(Othello othello, Othello.Color color) {
+        this(othello, color, System.in);
+    }
+
+    public OthelloPlayerWithKeyboard(Othello othello, Othello.Color color, InputStream input) {
         super(othello, color);
+        this.reader = new BufferedReader(new InputStreamReader(input));
     }
 
     @Override
@@ -20,12 +28,14 @@ public class OthelloPlayerWithKeyboard extends OthelloPlayer {
         Othello.Board.Square square = null;
         while (square == null) {
             try {
-                BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-                square = othello.getSquare(br.readLine());
+                square = othello.getSquare(reader.readLine());
             }
-            catch (IOException |IllegalArgumentException e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
+            catch (IllegalArgumentException iax) {
+                // noop
+            }
+            catch (IOException iox) {
+                iox.printStackTrace();
+                throw new RuntimeException(iox);
             }
         }
         return square;
