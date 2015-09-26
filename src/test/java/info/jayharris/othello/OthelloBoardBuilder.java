@@ -5,23 +5,22 @@ import java.lang.reflect.Method;
 
 class OthelloBoardBuilder {
 
-    static Method squareSetPieceMethod;
     static Field boardField;
-
-    static {
-        try {
-            boardField = Othello.class.getDeclaredField("board");
-            boardField.setAccessible(true);
-
-            squareSetPieceMethod = Othello.Board.Square.class.getDeclaredMethod("setPiece", Othello.Color.class);
-            squareSetPieceMethod.setAccessible(true);
-        } catch (NoSuchMethodException|NoSuchFieldException e) { }
-    }
+    static Method boardForceSetPieceMethod;
 
     public Othello othello;
 
     public OthelloBoardBuilder(Othello othello) {
         this.othello = othello;
+
+        try {
+            boardField = Othello.class.getDeclaredField("board");
+            boardField.setAccessible(true);
+
+            boardForceSetPieceMethod = Othello.Board.class.getDeclaredMethod(
+                    "forceSetPiece", Othello.Board.Square.class, Othello.Color.class);
+            boardForceSetPieceMethod.setAccessible(true);
+        } catch (NoSuchMethodException|NoSuchFieldException e) { }
     }
 
     public Othello.Board build(String str) throws Exception {
@@ -35,7 +34,10 @@ class OthelloBoardBuilder {
             } else if (c == 'w' || c == 'W') {
                 color = Othello.Color.WHITE;
             }
-            squareSetPieceMethod.invoke(board.getSquare(rank, file), color);
+
+            if (color != null) {
+                boardForceSetPieceMethod.invoke(board, board.getSquare(rank, file), color);
+            }
 
             file = (file + 1) % board.SQUARES_PER_SIDE;
             if (file == 0) {

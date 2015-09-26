@@ -31,7 +31,6 @@ public class BoardTest {
 
     @Test
     public void testSetPiece() {
-        othello = new Othello();
         Othello.Board board = othello.board;
 
         assumeThat(board, new OthelloBoardMatcher(othello, new HashMap<Othello.Color, Set<String>>() {{
