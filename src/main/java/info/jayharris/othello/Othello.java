@@ -198,6 +198,15 @@ public class Othello {
             return setPiece(square, color, false);
         }
 
+        /**
+         * Force set a disc on a square, even if it's not a legal move.
+         *
+         * Force-setting a disc doesn't flip any surrounding discs.
+         *
+         * @param square the square
+         * @param color the color
+         * @return {@code true}
+         */
         private boolean forceSetPiece(Square square, Color color) {
             Preconditions.checkNotNull(square);
 
@@ -208,7 +217,10 @@ public class Othello {
             Set<Square> toFlip = getSquaresToFlip(square, color);
             if (!toFlip.isEmpty() || force) {
                 square.setPiece(color);
-                toFlip.forEach(Square::flip);
+
+                if (!force) {
+                    toFlip.forEach(Square::flip);
+                }
 
                 occupied.add(square);
                 accessible.remove(square);
@@ -500,12 +512,13 @@ public class Othello {
             }
 
             public String getAlgebraicNotation() {
-                return String.valueOf((char) ('a' + rank)) + (file + 1);
+                return String.valueOf((char) ('a' + file)) + (rank + 1);
             }
 
             @Override
             public String toString() {
                 return "Square{" +
+                        "(" + getAlgebraicNotation() + ") " +
                         "rank=" + rank +
                         ", file=" + file +
                         ", color=" + color +
