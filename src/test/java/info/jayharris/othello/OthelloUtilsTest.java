@@ -60,4 +60,26 @@ public class OthelloUtilsTest {
                 collect(Collectors.toSet());
         assertEquals(expected, OthelloUtils.getAllMoves(board, Othello.Color.BLACK));
     }
+
+    @Test
+    public void testGetRandomMove() throws Exception {
+        Othello.Board board;
+
+        String s;
+        s = "        " +
+            "    b   " +
+            "   bb   " +
+            "  wwwb  " +
+            " bbwwbww" +
+            "   bbb  " +
+            "    b   " +
+            "     b  ";
+        board = builder.build(s);
+
+        Othello.Color c;
+        for (int i = 0; i < 10; ++i) {
+            c = (i % 2 == 0 ? Othello.Color.WHITE : Othello.Color.BLACK);
+            assertTrue(board.isLegal(OthelloUtils.getRandomMove(board, c), c));
+        }
+    }
 }
