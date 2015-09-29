@@ -62,10 +62,11 @@ public class Othello {
     }
 
     public OthelloPlayer play() {
+        Color winner;
+
         while (nextPly() != null);
 
-        int count = board.count(Color.WHITE);
-        return count == 0 ? null : count > 0 ? white : black;
+        return (winner = OthelloUtils.winner(board)) == null ? null : (winner == Color.WHITE ? white : black);
     }
 
     /**
@@ -301,51 +302,6 @@ public class Othello {
          */
         protected boolean hasMove(Color color) {
             return accessible.stream().anyMatch((square) -> isLegal(square, color));
-        }
-
-        /**
-         * Counts how many pieces black is winning by.
-         *
-         * @return the number of black discs on the board less the number of
-         *  white discs
-         */
-        public int count() {
-            return count(Color.BLACK);
-        }
-
-        /**
-         * Counts how many pieces {@code player} is winning by.
-         *
-         * @param player the player
-         * @return the number of {@code player}'s discs on the board less
-         *  the number of his opponent's discs
-         */
-        public int count(OthelloPlayer player) {
-            return count(player.color);
-        }
-
-        /**
-         * Counts how many pieces the {@code color} player is winning by.
-         *
-         * @param color the color
-         * @return the number of {@code color} discs on the board less the
-         *  number of {@code color.opposite()} discs
-         */
-        public int count(Color color) {
-            Color current;
-            int count = 0;
-            for (int rank = 0; rank < SQUARES_PER_SIDE; ++rank) {
-                for (int file = 0; file < SQUARES_PER_SIDE; ++file) {
-                    current = getSquare(rank, file).getColor();
-                    if (current == color) {
-                        ++count;
-                    }
-                    else if (current == color.opposite()) {
-                        --count;
-                    }
-                }
-            }
-            return count;
         }
 
         /**

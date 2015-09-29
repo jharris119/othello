@@ -22,7 +22,7 @@ public class OthelloUtils {
                 filter((square) -> board.isLegal(square, color)).
                 collect(Collectors.toSet());
     }
-
+    
     public static Board.Square getRandomMove(Othello othello, Color color) {
         return getRandomMove(othello.board, color);
     }
@@ -43,5 +43,36 @@ public class OthelloUtils {
             return null;
         }
         return Iterables.get(moves, random.nextInt(moves.size()));
+    }
+
+    /**
+     * Determines if the game is over.
+     *
+     * @param board the board
+     * @return {@code true} iff the game is over
+     */
+    public static boolean isGameOver(Board board) {
+        return board.getAccessible().isEmpty() || !(board.hasMove(Color.BLACK) || board.hasMove(Color.WHITE));
+    }
+
+    /**
+     * Gets the winning color.
+     *
+     * @param board the board
+     * @return the color with more pieces on the board, or {@code null} if there's a tie
+     */
+    public static Color winner(Board board) {
+        int black = 0;
+        Color color;
+
+        for (Board.Square square : board.getAccessible()) {
+            if ((color = square.getColor()) == Color.BLACK) {
+                ++black;
+            }
+            else if (color == Color.WHITE) {
+                --black;
+            }
+        }
+        return black == 0 ? null : (black > 0 ? Color.BLACK : Color.WHITE);
     }
 }
