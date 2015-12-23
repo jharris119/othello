@@ -2,6 +2,7 @@ package info.jayharris.othello;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
 import java.lang.reflect.Constructor;
@@ -347,6 +348,15 @@ public class Othello {
             return Collections.unmodifiableSet(accessible);
         }
 
+        public Set<Square> getCorners() {
+            return ImmutableSet.of(
+                    getSquare(0, 0),
+                    getSquare(0, SQUARES_PER_SIDE - 1),
+                    getSquare(SQUARES_PER_SIDE - 1, 0),
+                    getSquare(SQUARES_PER_SIDE - 1, SQUARES_PER_SIDE - 1)
+            );
+        }
+
         public class Square {
 
             private final int rank, file;
@@ -388,6 +398,19 @@ public class Othello {
                         map((dir) -> dir.apply(this)).
                         filter(Objects::nonNull).
                         filter(isOccupiedP.negate()).
+                        collect(Collectors.toSet());
+            }
+
+            /**
+             * Gets the {@link Square}s adjacent to {@code this} that are occupied.
+             *
+             * @return a set of adjacent, occupied {@code Square}s
+             */
+            public Set<Square> getOccupiedNeighbors() {
+                return directions.stream().
+                        map((dir) -> dir.apply(this)).
+                        filter(Objects::nonNull).
+                        filter(isOccupiedP).
                         collect(Collectors.toSet());
             }
 
