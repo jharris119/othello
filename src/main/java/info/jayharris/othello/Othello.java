@@ -31,6 +31,9 @@ public class Othello {
             Board.Square::get_n, Board.Square::get_ne, Board.Square::get_e, Board.Square::get_se,
             Board.Square::get_s, Board.Square::get_sw, Board.Square::get_w, Board.Square::get_nw
     );
+    public final static ImmutableList<Function<Board.Square, Board.Square>> cardinals = ImmutableList.of(
+            Board.Square::get_n, Board.Square::get_e, Board.Square::get_s, Board.Square::get_w
+    );
 
     public Othello() {
         this(OthelloPlayerWithKeyboard.class, OthelloPlayerWithKeyboard.class);
@@ -411,6 +414,18 @@ public class Othello {
                         map((dir) -> dir.apply(this)).
                         filter(Objects::nonNull).
                         filter(isOccupiedP).
+                        collect(Collectors.toSet());
+            }
+
+            /**
+             * Gets the {@link Square}s orthogonally adjacent to {@code this}.
+             *
+             * @return a set of orthogonally adjacent squares
+             */
+            public Set<Square> getOrthogonalNeighbors() {
+                return cardinals.stream().
+                        map((dir) -> dir.apply(this)).
+                        filter(Objects::nonNull).
                         collect(Collectors.toSet());
             }
 

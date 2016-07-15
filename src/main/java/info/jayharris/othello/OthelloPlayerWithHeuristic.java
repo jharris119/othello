@@ -33,11 +33,11 @@ public class OthelloPlayerWithHeuristic extends OthelloPlayer {
         return 0.0;
     }
 
-    private int calculateHeuristicValue(Othello.Board board) {
-        int liberties = OthelloUtils.getAllMoves(board, this.color.opposite()).size();
-
-        Set<Othello.Board.Square> stableDiscs = OthelloUtils.getStableDiscs(board);
-
-        return 0;
-    }
+//    private int calculateHeuristicValue(Othello.Board board) {
+//        int liberties = OthelloUtils.getAllMoves(board, this.color.opposite()).size();
+//
+//        Set<Othello.Board.Square> stableDiscs = OthelloUtils.getStableDiscs(board);
+//
+//        return 0;
+//    }
 }

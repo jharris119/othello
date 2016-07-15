@@ -1,10 +1,8 @@
 package info.jayharris.othello;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
 import info.jayharris.othello.Othello.*;
 import info.jayharris.othello.Othello.Board.Square;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 import java.util.function.Function;
@@ -13,7 +11,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class OthelloUtils {
-
     /**
      * Gets all legal moves for {@code color} on the given board.
      *
@@ -51,109 +48,72 @@ public class OthelloUtils {
     }
 
     /**
-     * Get the stable discs on the board.
+     * Gets a set of the stable discs on the board of any color.
      *
      * @param board the board
-     * @return a set of all stable discs on the board
+     * @return a set of stable discs
      */
-    public static Set<Board.Square> getStableDiscs(Board board) {
-        if (board.getCorners().stream().noneMatch(Board.Square::isOccupied)) {
-            return Collections.emptySet();
-        }
+    public static Set<Square> getStableDiscs(Board board) {
+        Set<Square> stable = Sets.newHashSet();
+        List<Square> upcoming = board.getCorners()
+                .stream()
+                .filter(Square::isOccupied)
+                .collect(Collectors.toList());
+        Set<Square> checking = Sets.newHashSet(upcoming);
 
-        for (Board.Square square : board.getCorners()) {
+        Predicate<Square> pIsStable = new Predicate<Square>() {
+            @Override
+            public boolean test(Square square) {
+                if (!square.isOccupied()) {
+                    return false;
+                }
 
-        }
+                if (traverseSquaresInAllDirections(square).allMatch(Square::isOccupied)) {
+                    return true;
+                }
 
+                Set<Set<Square>> antiparallelPairs = new HashSet<Set<Square>>() {{
+                    this.add(Sets.newHashSet(square.get_n(), square.get_s()));
+                    this.add(Sets.newHashSet(square.get_ne(), square.get_sw()));
+                    this.add(Sets.newHashSet(square.get_e(), square.get_w()));
+                    this.add(Sets.newHashSet(square.get_se(), square.get_nw()));
+                }};
+                return antiparallelPairs.stream()
+                        .allMatch(set -> set.contains(null) ||
+                                set.stream().anyMatch(neighbor -> (neighbor.getColor() == square.getColor() && stable.contains(neighbor))) ||
+                                set.stream().allMatch(neighbor -> stable.contains(neighbor))
 
-
-        return null;
-    }
-
-
-    public static Set<Square> getStableDiscsFromCorner(Square square) {
-        final Set<Square> stable = Sets.newHashSet();
-        Set<Square> examined = Sets.newHashSet();
-        Queue<Square> queue = Lists.newLinkedList();
-
-
-
-
-
-
-
-        Predicate<Square> isNullOrStableP = (s) -> {
-            System.err.println("    isNullOrStableP: " + s);
-            boolean i = Objects.isNull(s) || stable.contains(s);        // the color also has to match
-            System.err.println("    " + i);
-            return i;
-        };
-        Predicate<Square> examinedContainsP = examined::contains;
-        Square curr;
-
-        queue.add(square);
-        while (!queue.isEmpty()) {
-            curr = queue.remove();
-
-            System.err.println("curr: " + curr.toString());
-
-            if(ImmutableList.of(
-                    Pair.of(curr.get_w(), curr.get_e()),
-                    Pair.of(curr.get_nw(), curr.get_se()),
-                    Pair.of(curr.get_n(), curr.get_s()),
-                    Pair.of(curr.get_ne(), curr.get_sw())
-            ).stream()
-                    .allMatch((pair) -> {
-                        System.err.println("  allMatch");
-                        System.err.println(String.format("  %s", pair.getLeft()));
-                        System.err.println(String.format("  %s", pair.getRight()));
-                        return isNullOrStableP.test(pair.getLeft()) || isNullOrStableP.test(pair.getRight());
-                    })) {
-                stable.add(curr);
-                queue.addAll(curr.getOccupiedNeighbors().stream().filter(examinedContainsP.negate()).collect(Collectors.toSet()));
+                        );
             }
+        };
 
-            examined.add(curr);
+        while (!upcoming.isEmpty()) {
+            Square current = upcoming.remove(0);
+            Othello.cardinals.forEach((dir) -> {
+                Square next = current;
+                while ((next = dir.apply(next)) != null && next.isOccupied() && checking.add(next)) {
+                    upcoming.add(next);
+                }
+            });
+            if (pIsStable.test(current)) {
+                stable.add(current);
+            }
         }
-
         return stable;
     }
 
-//    public static Set<Square> getStableDiscsFromCorner(Square square) {
-//        final Set<Square> stable = Sets.newHashSet(), notStable = Sets.newHashSet();
-//        Queue<Square> queue = Lists.newLinkedList();
-//        Predicate<Square> isUnchangingP = (s) -> s == null || stable.contains(s);
-//        Predicate<Pair<Square, Square>> isUnchangingPairP = (pair) -> isUnchangingP.test(pair.getLeft()) || isUnchangingP.test(pair.getRight());
-//
-//        queue.add(square);
-//
-//        Stream<Pair<Square, Square>> pairs;
-//        Square curr;
-//        while (!queue.isEmpty()) {
-//            curr = queue.remove();
-//            pairs = ImmutableList.of(
-//                    Pair.of(curr.get_e(), curr.get_w()),
-//                    Pair.of(curr.get_ne(), curr.get_sw()),
-//                    Pair.of(curr.get_n(), curr.get_s()),
-//                    Pair.of(curr.get_se(), curr.get_nw())).stream();
-//
-//            if (pairs.allMatch(isUnchangingPairP)) {
-//                stable.add(curr);
-//                for (Square neighbor : curr.getOccupiedNeighbors()) {
-//                    if (!(stable.contains(neighbor) || notStable.contains(neighbor))) {
-//                        queue.add(neighbor);
-//                    }
-//                }
-//            }
-//            else {
-//                notStable.add(curr);
-//            }
-//
-//            pairs.close();
-//        }
-//
-//        return stable;
-//    }
+    public static Stream<Square> traverseSquaresInAllDirections(Square current) {
+        Stream.Builder<Square> builder = Stream.builder();
+        return Othello.directions.stream().flatMap((dir) -> traverseSquaresInDirection(current, dir));
+    }
+
+    public static Stream<Square> traverseSquaresInDirection(Square current, Function<Square, Square> direction) {
+        Stream.Builder<Square> builder = Stream.builder();
+        while ((current = direction.apply(current)) != null) {
+            builder.accept(current);
+        }
+        return builder.build();
+    }
 
     /**
      * Determines if the game is over.

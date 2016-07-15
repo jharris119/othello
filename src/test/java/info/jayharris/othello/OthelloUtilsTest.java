@@ -1,8 +1,10 @@
 package info.jayharris.othello;
 
+import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -94,38 +96,48 @@ public class OthelloUtilsTest {
             "        " +
             "   wb   " +
             "   bw   " +
+            "        " +
+            "        " +
+            "        ";
+        board = builder.build(s);
+        assertEquals(Collections.emptySet(), OthelloUtils.getStableDiscs(board));
+
+        s = "        " +
+            "        " +
+            "        " +
+            "   wb   " +
+            "   bw   " +
             "    bwb " +
             "      w " +
             "      bw";
         board = builder.build(s);
         expected = Stream.of("h8").map(board::getSquare).collect(Collectors.toSet());
-        assertEquals(expected, OthelloUtils.getStableDiscsFromCorner(board.getSquare("h8")));
+        assertEquals(expected, OthelloUtils.getStableDiscs(board));
 
-//        s = "wwwb    " +
-//            "  b     " +
-//            " bwb    " +
-//            " bbbb   " +
-//            "  www   " +
-//            "        " +
-//            "        " +
-//            "        ";
-//        board = builder.build(s);
-//        expected = Stream.of("a1", "b1", "c1").map(board::getSquare).collect(Collectors.toSet());
-//        assertEquals(expected, OthelloUtils.getStableDiscsFromCorner(board.getSquare("a1")));
+        s = "wwwb    " +
+            "  b     " +
+            " bwb    " +
+            " bbbb   " +
+            "  www   " +
+            "        " +
+            "        " +
+            "        ";
+        board = builder.build(s);
+        expected = Stream.of("a1", "b1", "c1").map(board::getSquare).collect(Collectors.toSet());
+        assertEquals(expected, OthelloUtils.getStableDiscs(board));
 
-//        s = "   www  " +
-//            "  bwwb b" +
-//            "wbwwwwbb" +
-//            "wwwwbwbb" +
-//            "wwwbwwbb" +
-//            "wwwwwbbb" +
-//            "  bbbbbb" +
-//            " bbbbbbb";
-//        board = builder.build(s);
-//
-//        expected = Stream.of("h2", "g3", "h3", "g4", "h4", "g5", "h5", "d6", "f6", "g6", "h6", "c7", "d7", "e7", "f7", "g7", "h7", "b8", "c8", "d8", "e8", "f8", "g8", "h8").
-//                map(board::getSquare).
-//                collect(Collectors.toSet());
-//        assertEquals(expected, OthelloUtils.getStableDiscs(board));
+        s = "   www  " +
+            "  bwwb b" +
+            "wbwwwwbb" +
+            "wwwwbwbb" +
+            "wwwbwwbb" +
+            "wwwwwbbb" +
+            "  bbbbbb" +
+            " bbbbbbb";
+        board = builder.build(s);
+        expected = Stream.of("h2", "g3", "h3", "g4", "h4", "g5", "h5", "d6", "f6", "g6", "h6", "c7", "d7", "e7", "f7", "g7", "h7", "b8", "c8", "d8", "e8", "f8", "g8", "h8").
+                map(board::getSquare).
+                collect(Collectors.toSet());
+        assertEquals(expected, OthelloUtils.getStableDiscs(board));
     }
 }
