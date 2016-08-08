@@ -135,7 +135,7 @@ public class OthelloUtils {
         int black = 0;
         Color color;
 
-        for (Board.Square square : board.getAccessible()) {
+        for (Board.Square square : board.getOccupied()) {
             if ((color = square.getColor()) == Color.BLACK) {
                 ++black;
             }

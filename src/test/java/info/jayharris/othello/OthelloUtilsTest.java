@@ -140,4 +140,22 @@ public class OthelloUtilsTest {
                 collect(Collectors.toSet());
         assertEquals(expected, OthelloUtils.getStableDiscs(board));
     }
+
+    @Test
+    public void testWinner() throws Exception {
+        Othello.Board board;
+        String s;
+
+        s = "wbwwwwbbbbbwbbwwbwbbbwbwwbbbwbwwbwbbwbwbwwwbbbbbwbbbwwbbbbwbbbbb";
+        board = builder.build(s);
+        assertEquals(Othello.Color.BLACK, OthelloUtils.winner(board));
+
+        s = "wbwwwbwbwbbwwbwwwwwbwwwwbwbbwwwbwwbwwwwwbbwwwwbwwwwwbwbwwbwwbwww";
+        board = builder.build(s);
+        assertEquals(Othello.Color.WHITE, OthelloUtils.winner(board));
+
+        s = "bwwbbbwwbbwbbbwbwwwbbbwwwbwbwbwwbwwwwbbwbwwbwbbwbbbwbwwwbbwbwbwb";
+        board = builder.build(s);
+        assertNull(OthelloUtils.winner(board));
+    }
 }
