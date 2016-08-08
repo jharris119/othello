@@ -68,7 +68,7 @@ public class OthelloUtils {
                     return false;
                 }
 
-                if (traverseSquaresInAllDirections(square).allMatch(Square::isOccupied)) {
+                if (collectSquaresInAllDirections(square).allMatch(Square::isOccupied)) {
                     return true;
                 }
 
@@ -102,12 +102,11 @@ public class OthelloUtils {
         return stable;
     }
 
-    public static Stream<Square> traverseSquaresInAllDirections(Square current) {
-        Stream.Builder<Square> builder = Stream.builder();
-        return Othello.directions.stream().flatMap((dir) -> traverseSquaresInDirection(current, dir));
+    private static Stream<Square> collectSquaresInAllDirections(Square current) {
+        return Othello.directions.stream().flatMap((dir) -> collectSquaresInDirection(current, dir));
     }
 
-    public static Stream<Square> traverseSquaresInDirection(Square current, Function<Square, Square> direction) {
+    private static Stream<Square> collectSquaresInDirection(Square current, Function<Square, Square> direction) {
         Stream.Builder<Square> builder = Stream.builder();
         while ((current = direction.apply(current)) != null) {
             builder.accept(current);
