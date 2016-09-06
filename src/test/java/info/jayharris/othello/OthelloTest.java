@@ -168,4 +168,17 @@ public class OthelloTest {
         assertEquals(othello.black, othello.nextPly());
         assertThat(othello.board, new OthelloBoardMatcher(othello, s));
     }
+
+    public static Othello mockGame(int plies) {
+        Othello game = new Othello(OthelloPlayerRandomMove.class, OthelloPlayerRandomMove.class);
+        for (int i = 0; i < plies; ++i) {
+            game.nextPly();
+        }
+        return game;
+    }
+
+    public static void main(String... args) {
+        Othello game = OthelloTest.mockGame(2);
+        System.out.println(game.board);
+    }
 }
