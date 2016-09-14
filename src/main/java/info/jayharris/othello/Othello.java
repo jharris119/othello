@@ -188,6 +188,23 @@ public class Othello {
             accessible = Sets.newHashSet();
         }
 
+        private Board(Board original) {
+            this();
+            for (int rank = 0; rank < SQUARES_PER_SIDE; ++rank) {
+                for (int file = 0; file < SQUARES_PER_SIDE; ++file) {
+                    grid[rank][file].color = original.getSquare(rank, file).getColor();
+                }
+            }
+
+            occupied.addAll(original.getOccupied());
+            frontier.addAll(original.getFrontier());
+            accessible.addAll(original.getAccessible());
+        }
+
+        public Board copy() {
+            return new Othello.Board(this);
+        }
+
         /**
          * Puts a {@code color} disc on {@code square}, if legal, and flips
          * the necessary discs.

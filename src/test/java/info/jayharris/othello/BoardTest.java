@@ -161,6 +161,24 @@ public class BoardTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void testCopy() throws Exception {
+        String s;
+        Othello.Board board;
+
+        s = "       b" +
+            "       b" +
+            " wbbb  b" +
+            " w     b" +
+            "  w     " +
+            "   w    " +
+            "    w   " +
+            "     b  ";
+        board = builder.build(s);
+
+        assertNotSame(board, board.copy());
+    }
+
     private Set<Othello.Board.Square> squares(Othello.Board board, String... squares) {
         return Stream.of(squares).map(board::getSquare).collect(Collectors.toSet());
     }
