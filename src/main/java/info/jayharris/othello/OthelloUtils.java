@@ -11,6 +11,18 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class OthelloUtils {
+
+    /**
+     * Gets all legal moves for {@code player} on the given board.
+     *
+     * @param board the board
+     * @param player the player
+     * @return a set of legal moves for {@code player} on {@code board}
+     */
+    public static Set<Square> getAllMoves(Board board, OthelloPlayer player) {
+        return getAllMoves(board, player.color);
+    }
+
     /**
      * Gets all legal moves for {@code color} on the given board.
      *
