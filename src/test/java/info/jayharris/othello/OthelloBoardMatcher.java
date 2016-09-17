@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+@Deprecated
 class OthelloBoardMatcher extends BaseMatcher<Othello.Board> {
 
     Othello othello;

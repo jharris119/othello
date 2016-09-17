@@ -176,6 +176,7 @@ public class BoardTest {
             "     b  ";
         board = builder.build(s);
 
+        assertThat(board.copy(), new OthelloBoardMatcher2(board));
         assertNotSame(board, board.copy());
     }
 
